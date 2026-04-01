@@ -40,10 +40,12 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         db.query(University).filter(University.domain == domain).first()
     )
     if university is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="University not found for this email domain",
-        )
+        uni_name = domain.removesuffix(".edu.tr")
+        if not uni_name:
+            uni_name = domain
+        university = University(name=uni_name, domain=domain)
+        db.add(university)
+        db.flush()
 
     user = User(
         university_id=university.id,
