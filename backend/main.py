@@ -3,8 +3,11 @@ from fastapi import FastAPI
 from sqlalchemy.exc import OperationalError
 from app.database import engine, Base
 from app.models import *
+from app.routers.auth import router as auth_router
 
 app = FastAPI(title="Campus Hub API", version="0.1.0")
+
+app.include_router(auth_router, prefix="/auth")
 
 @app.on_event("startup")
 def startup():
