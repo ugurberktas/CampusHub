@@ -2,9 +2,9 @@ import time
 from fastapi import FastAPI
 from sqlalchemy.exc import OperationalError
 from app.database import engine, Base
+from app.models import *
 
 app = FastAPI(title="Campus Hub API", version="0.1.0")
-
 
 @app.on_event("startup")
 def startup():
