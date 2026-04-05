@@ -14,29 +14,51 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 *   **Konteynerleştirme:** Docker & Docker Compose
 *   **Frontend:** React.js (Henüz başlanmadı, sadece klasör yapısı mevcut)
 
-### 📌 Mevcut Kaynaklar ve İlerleyiş (Current State)
-1.  **Konteyner ve Ortam (Docker & Env):**
-    *   `docker-compose.yml` tamamlandı. `db` (Postgres), `pgadmin` ve `backend` servisleri birbirine bağlandı.
-    *   Backend, `depends_on: db` kuralıyla çalışıyor. 
-    *   Gerekli ortam değişkenleri (`.env` ve `.env.example`) tanımlandı.
-2.  **Backend Altyapısı (FastAPI):**
-    *   `main.py` oluşturuldu. `startup` event'ine veritabanı bağlantısı kopsa bile 5 defa tekrarlamasına (retry mekanizması) olanak sağlayan dayanıklı bir mimari eklendi.
-    *   `/health` kontrol endpoint'i aktif.
-    *   `app/database.py` içine SQLAlchemy ayarları, `engine`, `SessionLocal` ve `get_db` dependency fonksiyonları eklendi.
-    *   `app/models.py` ve `app/schemas.py` dosyaları oluşturulmuş durumda, veritabanı tabloları modelleniyor.
-    *   `app/routers/auth.py` ile yetkilendirme (Authentication) süreçlerinin temelleri atıldı.
-3.  **Frontend:** 
-    *   `frontend/` klasörü şimdilik `.gitkeep` ile yer tutucu olarak bekliyor.
+---
+
+## ✅ Tamamlananlar (Completed)
+
+1.  **Proje İskeleti:** Klasör yapısı, `.gitignore`, `.env`, `requirements.txt` oluşturuldu.
+2.  **Docker Kurulumu:** PostgreSQL 15, pgAdmin ve FastAPI servisleri ayağa kaldırıldı ve birbirine bağlandı.
+3.  **Veritabanı Modelleri:** SQLAlchemy ile 15 tablo oluşturuldu:
+    *   `universities`, `users`, `clubs`, `club_members`, `posts`, `events`, `event_registrations`, `attendance`, `certificates`, `salons`, `salon_reservations`, `applications`, `follows`, `notifications`, `interest_areas`
+4.  **Auth Sistemi (`feature/auth` branch):**
+    *   `POST /auth/register` — Çalışıyor, başarıyla test edildi ✔
+    *   `POST /auth/login` — Implement edildi
+    *   `GET /auth/me` — Implement edildi
+    *   `.edu.tr` e-posta doğrulaması aktif
+    *   `student_no` e-postadan otomatik çıkarılıyor
+    *   JWT token sistemi kuruldu
+    *   Rol sistemi mevcut: `student`, `club_owner`, `core_team`, `sks`
+    *   Üniversite, kayıt sırasında mevcut değilse otomatik oluşturuluyor
+
+---
+
+## 🔄 Devam Edenler (In Progress)
+
+*   `feature/auth` branch'i açık, henüz `dev`'e merge edilmedi.
 
 ---
 
 ## 🎯 Sonraki Adımlar (To-Do List)
 
-- [ ] **Alembic Kurulumu ve Migration:** Veritabanı tablolarını güvenli bir şekilde yönetmek için Alembic (migration) yapılandırılmalı.
-- [ ] **Backend İş Mantığı:** Auth (Yetkilendirme) endpoint'lerinin (`/login`, `/register`) test edilmesi ve eksiklerin tamamlanması.
-- [ ] **Frontend Mimarisi:** React.js veya Next.js kurularak temel sayfa yapılarının ve routing (Authentication Guard vb.) işlemlerinin kodlanmaya başlanması.
-- [ ] **Ortak API İletişimi:** Backend'in ayağa kalktığında Swagger UI üzerinden dış API tüketimi testlerinin yapılması.
+- [ ] **`/auth/login` endpoint testini tamamla**
+- [ ] **`feature/auth` → `dev` merge işlemi**
+- [ ] **`feature/clubs` branch aç** — Kulüp yönetimi API'si
+- [ ] **`feature/events` branch aç** — Event + QR sistemi
+- [ ] **`feature/frontend` branch aç** — React.js frontend geliştirmesi
 
 ---
 
-*Son güncelleme tarihi dosyaya işlenen commit'lere/kayıtlara göre takip edilecektir.*
+## 🌿 Branch Stratejisi (Branch Strategy)
+
+| Branch | Durum | Açıklama |
+|---|---|---|
+| `main` | Aktif | Kararlı (stable) kod |
+| `dev` | Aktif | Ana geliştirme ortamı |
+| `feature/database-models` | Merged | `dev`'e merge edildi ✔ |
+| `feature/auth` | In Progress | Devam ediyor, merge bekliyor |
+
+---
+
+*Son güncelleme: 2026-04-05*
