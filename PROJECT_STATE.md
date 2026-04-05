@@ -12,7 +12,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 *   **Veritabanı (Database):** PostgreSQL 15 (Docker üzerinden)
 *   **Veritabanı Yönetimi:** pgAdmin4
 *   **Konteynerleştirme:** Docker & Docker Compose
-*   **Frontend:** React.js (Henüz başlanmadı, sadece klasör yapısı mevcut)
+*   **Frontend:** React.js + Vite (auth sayfaları tamamlandı — Login, Register, Home)
 
 ---
 
@@ -24,13 +24,16 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
     *   `universities`, `users`, `clubs`, `club_members`, `posts`, `events`, `event_registrations`, `attendance`, `certificates`, `salons`, `salon_reservations`, `applications`, `follows`, `notifications`, `interest_areas`
 4.  **Auth Sistemi (`feature/auth`):** JWT, rol sistemi, `.edu.tr` doğrulama, register/login/me endpoint'leri ✔
 5.  **Kulüp Yönetimi (`feature/clubs`):** Oluşturma, listeleme, SKS onay/red/askı sistemi, üye yönetimi ✔
-6.  **Etkinlik Yönetimi (`feature/events`):**
-    *   `POST /events` — Etkinlik oluştur (club owner/core_team)
-    *   `GET /events` — Yaklaşan etkinlikleri listele (public, tarih sıralı)
-    *   `GET /events/{event_id}` — Etkinlik detayı (public)
-    *   `DELETE /events/{event_id}` — Etkinliği sil (club owner/core_team)
-    *   `POST /events/{event_id}/register` — Kayıt ol (kapasite & mükerrer kontrolü + erken uyarı)
-    *   `GET /events/{event_id}/registrations` — Kayıtlı kullanıcıları listele (club staff)
+6.  **Etkinlik Yönetimi (`feature/events`):** Oluşturma, listeleme, kayıt, erken uyarı sistemi ✔
+7.  **Frontend (`feature/frontend`):**
+    *   Vite + React.js kurulumu tamamlandı
+    *   `axios` ile API entegrasyonu, JWT interceptor
+    *   `AuthContext` — login, register, logout, auto-login
+    *   `PrivateRoute` — korumalı sayfa yönlendirmesi
+    *   `/login` — e-posta/şifre giriş formu
+    *   `/register` — tam kayıt formu (full_name, email, şifre, bölüm)
+    *   `/home` — korumalı; kullanıcı hoş geldin + yaklaşan etkinlikler listesi
+    *   `docker-compose.yml`'e frontend servisi eklendi (port 3000)
 
 ---
 
@@ -46,8 +49,9 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 - [x] **`feature/auth` → `dev` merge işlemi**
 - [x] **`feature/clubs` branch aç** — Kulüp yönetimi API'si tamamlandı ✔
 - [x] **`feature/events` branch aç** — Etkinlik yönetimi API'si tamamlandı ✔
+- [x] **`feature/frontend` branch aç** — React.js auth sayfaları tamamlandı ✔
 - [ ] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
-- [ ] **`feature/frontend` branch aç** — React.js frontend geliştirmesi
+- [ ] **Frontend genişletme** — Kulüp listesi, etkinlik detay, profil sayfası
 
 ---
 
@@ -60,7 +64,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 | `feature/database-models` | Merged | `dev`'e merge edildi ✔ |
 | `feature/auth` | Merged | `dev`'e merge edildi ✔ |
 | `feature/clubs` | Merged | `dev`'e merge edildi ✔ |
-| `feature/events` | In Progress | Devam ediyor, merge bekliyor |
+| `feature/events` | Merged | `dev`'e merge edildi ✔ |
+| `feature/frontend` | In Progress | Devam ediyor, merge bekliyor |
 
 ---
 
