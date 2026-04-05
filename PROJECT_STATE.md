@@ -22,15 +22,15 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 2.  **Docker Kurulumu:** PostgreSQL 15, pgAdmin ve FastAPI servisleri ayağa kaldırıldı ve birbirine bağlandı.
 3.  **Veritabanı Modelleri:** SQLAlchemy ile 15 tablo oluşturuldu:
     *   `universities`, `users`, `clubs`, `club_members`, `posts`, `events`, `event_registrations`, `attendance`, `certificates`, `salons`, `salon_reservations`, `applications`, `follows`, `notifications`, `interest_areas`
-4.  **Auth Sistemi (`feature/auth` branch):**
-    *   `POST /auth/register` — Çalışıyor, başarıyla test edildi ✔
-    *   `POST /auth/login` — Implement edildi
-    *   `GET /auth/me` — Implement edildi
-    *   `.edu.tr` e-posta doğrulaması aktif
-    *   `student_no` e-postadan otomatik çıkarılıyor
-    *   JWT token sistemi kuruldu
-    *   Rol sistemi mevcut: `student`, `club_owner`, `core_team`, `sks`
-    *   Üniversite, kayıt sırasında mevcut değilse otomatik oluşturuluyor
+4.  **Auth Sistemi (`feature/auth`):** JWT, rol sistemi, `.edu.tr` doğrulama, register/login/me endpoint'leri ✔
+5.  **Kulüp Yönetimi (`feature/clubs`):** Oluşturma, listeleme, SKS onay/red/askı sistemi, üye yönetimi ✔
+6.  **Etkinlik Yönetimi (`feature/events`):**
+    *   `POST /events` — Etkinlik oluştur (club owner/core_team)
+    *   `GET /events` — Yaklaşan etkinlikleri listele (public, tarih sıralı)
+    *   `GET /events/{event_id}` — Etkinlik detayı (public)
+    *   `DELETE /events/{event_id}` — Etkinliği sil (club owner/core_team)
+    *   `POST /events/{event_id}/register` — Kayıt ol (kapasite & mükerrer kontrolü + erken uyarı)
+    *   `GET /events/{event_id}/registrations` — Kayıtlı kullanıcıları listele (club staff)
 
 ---
 
@@ -44,17 +44,9 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 - [x] **`/auth/login` endpoint testini tamamla**
 - [x] **`feature/auth` → `dev` merge işlemi**
-- [x] **`feature/clubs` branch aç** — Kulüp yönetimi API'si tamamlandı
-  - `POST /clubs` — Kulüp oluştur (status=pending, creator otomatik owner)
-  - `GET /clubs` — Aktif kulüpleri listele (follower_count dahil)
-  - `GET /clubs/{club_id}` — Kulüp detayı
-  - `GET /clubs/pending` — Bekleyen kulüpler (SKS only)
-  - `PUT /clubs/{club_id}/approve` — Kulübü onayla (SKS)
-  - `PUT /clubs/{club_id}/reject` — Kulübü reddet (SKS)
-  - `PUT /clubs/{club_id}/suspend` — Kulübü askıya al (SKS)
-  - `POST /clubs/{club_id}/members` — Üye ekle (owner)
-  - `GET /clubs/{club_id}/members` — Üyeleri listele (auth)
-- [ ] **`feature/events` branch aç** — Event + QR sistemi
+- [x] **`feature/clubs` branch aç** — Kulüp yönetimi API'si tamamlandı ✔
+- [x] **`feature/events` branch aç** — Etkinlik yönetimi API'si tamamlandı ✔
+- [ ] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
 - [ ] **`feature/frontend` branch aç** — React.js frontend geliştirmesi
 
 ---
@@ -67,7 +59,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 | `dev` | Aktif | Ana geliştirme ortamı |
 | `feature/database-models` | Merged | `dev`'e merge edildi ✔ |
 | `feature/auth` | Merged | `dev`'e merge edildi ✔ |
-| `feature/clubs` | In Progress | Devam ediyor, merge bekliyor |
+| `feature/clubs` | Merged | `dev`'e merge edildi ✔ |
+| `feature/events` | In Progress | Devam ediyor, merge bekliyor |
 
 ---
 

@@ -70,3 +70,50 @@ class ClubMemberResponse(BaseModel):
     role: str
     permissions: Optional[dict]
     joined_at: datetime
+
+
+# ── Event Schemas ─────────────────────────────────────────────────────────────
+
+class EventCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    location: Optional[str] = None
+    capacity: Optional[int] = None
+    expected_attendance_rate: float = 0.4
+    event_date: datetime
+    club_id: UUID  # caller must specify which of their clubs the event belongs to
+
+
+class EventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    title: str
+    description: Optional[str]
+    location: Optional[str]
+    capacity: Optional[int]
+    expected_attendance_rate: float
+    event_date: datetime
+    status: str
+    club_id: UUID
+    created_at: datetime
+    registration_count: int = 0
+
+
+class EventRegistrationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    event_id: UUID
+    user_id: UUID
+    registered_at: datetime
+
+
+class RegistrationAttendeeResponse(BaseModel):
+    """Used in GET /events/{event_id}/registrations"""
+    model_config = ConfigDict(from_attributes=True)
+
+    full_name: str
+    email: str
+    student_no: Optional[str]
+    department: Optional[str]
