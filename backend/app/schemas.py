@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
@@ -35,3 +36,37 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+# ── Club Schemas ──────────────────────────────────────────────────────────────
+
+class ClubCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+
+
+class ClubResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    description: Optional[str]
+    category: Optional[str]
+    status: str
+    logo_url: Optional[str]
+    banner_url: Optional[str]
+    university_id: UUID
+    created_at: datetime
+    follower_count: int = 0
+
+
+class ClubMemberResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    club_id: UUID
+    role: str
+    permissions: Optional[dict]
+    joined_at: datetime

@@ -42,9 +42,18 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 ## 🎯 Sonraki Adımlar (To-Do List)
 
-- [ ] **`/auth/login` endpoint testini tamamla**
-- [ ] **`feature/auth` → `dev` merge işlemi**
-- [ ] **`feature/clubs` branch aç** — Kulüp yönetimi API'si
+- [x] **`/auth/login` endpoint testini tamamla**
+- [x] **`feature/auth` → `dev` merge işlemi**
+- [x] **`feature/clubs` branch aç** — Kulüp yönetimi API'si tamamlandı
+  - `POST /clubs` — Kulüp oluştur (status=pending, creator otomatik owner)
+  - `GET /clubs` — Aktif kulüpleri listele (follower_count dahil)
+  - `GET /clubs/{club_id}` — Kulüp detayı
+  - `GET /clubs/pending` — Bekleyen kulüpler (SKS only)
+  - `PUT /clubs/{club_id}/approve` — Kulübü onayla (SKS)
+  - `PUT /clubs/{club_id}/reject` — Kulübü reddet (SKS)
+  - `PUT /clubs/{club_id}/suspend` — Kulübü askıya al (SKS)
+  - `POST /clubs/{club_id}/members` — Üye ekle (owner)
+  - `GET /clubs/{club_id}/members` — Üyeleri listele (auth)
 - [ ] **`feature/events` branch aç** — Event + QR sistemi
 - [ ] **`feature/frontend` branch aç** — React.js frontend geliştirmesi
 
@@ -57,7 +66,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 | `main` | Aktif | Kararlı (stable) kod |
 | `dev` | Aktif | Ana geliştirme ortamı |
 | `feature/database-models` | Merged | `dev`'e merge edildi ✔ |
-| `feature/auth` | In Progress | Devam ediyor, merge bekliyor |
+| `feature/auth` | Merged | `dev`'e merge edildi ✔ |
+| `feature/clubs` | In Progress | Devam ediyor, merge bekliyor |
 
 ---
 
