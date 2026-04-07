@@ -100,7 +100,8 @@ export default function LoginPage() {
       await login(form.email, form.password)
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.detail || 'Giriş başarısız. Bilgilerinizi kontrol edin.')
+      const detail = err.response?.data?.detail
+      setError(typeof detail === 'string' ? detail : 'Giriş başarısız. Bilgilerinizi kontrol edin.')
     } finally {
       setLoading(false)
     }

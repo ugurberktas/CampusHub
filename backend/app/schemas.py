@@ -13,9 +13,8 @@ class UserRegister(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
-
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

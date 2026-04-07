@@ -86,7 +86,8 @@ export default function RegisterPage() {
       setSuccess('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz…')
       setTimeout(() => navigate('/login'), 1800)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Kayıt başarısız. Lütfen tekrar deneyin.')
+      const detail = err.response?.data?.detail
+      setError(typeof detail === 'string' ? detail : 'Bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
     }

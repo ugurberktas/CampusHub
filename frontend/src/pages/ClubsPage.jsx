@@ -120,7 +120,8 @@ export default function ClubsPage() {
       const res = await api.get('/clubs')
       setClubs(res.data)
     } catch (err) {
-      setError(err.response?.data?.detail || 'Kulüpler yüklenirken bir hata oluştu.')
+      const detail = err.response?.data?.detail
+      setError(typeof detail === 'string' ? detail : 'Bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
     }

@@ -221,7 +221,8 @@ export default function ClubDetailPage() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Kulüp bilgileri yüklenirken bir hata oluştu.')
+      const detail = err.response?.data?.detail
+      setError(typeof detail === 'string' ? detail : 'Bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
     }

@@ -4,7 +4,12 @@ from sqlalchemy.orm import Session
 from app.auth import create_access_token, get_current_user, get_password_hash, verify_password
 from app.database import get_db
 from app.models import University, User
-from app.schemas import Token, UserLogin, UserRegister, UserResponse
+from app.schemas import Token, UserRegister, UserResponse
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 router = APIRouter()
 
@@ -64,7 +69,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-def login(body: UserLogin, db: Session = Depends(get_db)):
+def login(body: LoginRequest, db: Session = Depends(get_db)):
     normalized = str(body.email).strip().lower()
     user = db.query(User).filter(User.email == normalized).first()
     if user is None:
