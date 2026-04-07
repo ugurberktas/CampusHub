@@ -12,7 +12,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 *   **Veritabanı (Database):** PostgreSQL 15 (Docker üzerinden)
 *   **Veritabanı Yönetimi:** pgAdmin4
 *   **Konteynerleştirme:** Docker & Docker Compose
-*   **Frontend:** React.js (Henüz başlanmadı, sadece klasör yapısı mevcut)
+*   **Frontend:** React.js + Vite (localhost:3000) — Auth, Kulüpler ve Etkinlik Detay sayfaları tamamlandı
 
 ---
 
@@ -31,6 +31,14 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
     *   `DELETE /events/{event_id}` — Etkinliği sil (club owner/core_team)
     *   `POST /events/{event_id}/register` — Kayıt ol (kapasite & mükerrer kontrolü + erken uyarı)
     *   `GET /events/{event_id}/registrations` — Kayıtlı kullanıcıları listele (club staff)
+7.  **Frontend (`feature/kulup-arayuzu`):** React + Vite kurulumu tamamlandı:
+    *   `LoginPage.jsx`, `RegisterPage.jsx`, `HomePage.jsx` — Auth akışı ✔
+    *   `ClubsPage.jsx`, `ClubCard.jsx` — Kulüp listesi (arama + kategori filtresi) ✔
+    *   `ClubDetailPage.jsx` — Kulüp detay + Takip Et butonu ✔
+    *   `EventDetailPage.jsx` — Etkinlik detay + Kayıt Ol butonu ✔
+    *   `src/api/axios.js` — JWT interceptor ✔
+    *   `src/context/AuthContext.jsx` — Global auth state ✔
+    *   `src/App.jsx` — Route: `/`, `/clubs`, `/clubs/:id`, `/events/:id` ✔
 
 ---
 
@@ -46,8 +54,11 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 - [x] **`feature/auth` → `dev` merge işlemi**
 - [x] **`feature/clubs` branch aç** — Kulüp yönetimi API'si tamamlandı ✔
 - [x] **`feature/events` branch aç** — Etkinlik yönetimi API'si tamamlandı ✔
-- [ ] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
-- [ ] **`feature/frontend` branch aç** — React.js frontend geliştirmesi
+- [x] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
+- [x] **`feature/frontend` başlat** — Clubs UI + Events UI modülleri tamamlandı (`feature/kulup-arayuzu`) ✔
+- [ ] **EventsPage.jsx** — Tüm etkinlikleri listeleyen sayfa (`GET /events`)
+- [ ] **ProfilePage.jsx** — Kullanıcı profil sayfası
+- [ ] **QR katılım sistemi** — Etkinlik QR tarama akışı
 
 ---
 
@@ -61,7 +72,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 | `feature/auth` | Merged | `dev`'e merge edildi ✔ |
 | `feature/clubs` | Merged | `dev`'e merge edildi ✔ |
 | `feature/events` | In Progress | Devam ediyor, merge bekliyor |
+| `feature/kulup-arayuzu` | In Progress | Frontend: Clubs UI + Events UI tamamlandı |
 
 ---
 
-*Son güncelleme: 2026-04-05*
+*Son güncelleme: 2026-04-08*

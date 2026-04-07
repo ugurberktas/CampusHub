@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import ClubsPage from './pages/ClubsPage'
 import ClubDetailPage from './pages/ClubDetailPage'
+import EventDetailPage from './pages/EventDetailPage'
 
 // Require authentication — redirect to /login if not logged in
 function PrivateRoute({ children }) {
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
           <Route path="/clubs" element={<PrivateRoute><ClubsPage /></PrivateRoute>} />
           <Route path="/clubs/:id" element={<PrivateRoute><ClubDetailPage /></PrivateRoute>} />
+          <Route path="/events/:id" element={<PrivateRoute><EventDetailPage /></PrivateRoute>} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
