@@ -39,6 +39,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
     *   `src/api/axios.js` — JWT interceptor ✔
     *   `src/context/AuthContext.jsx` — Global auth state ✔
     *   `src/App.jsx` — Route: `/`, `/clubs`, `/clubs/:id`, `/events/:id` ✔
+8.  **CORS Middleware (`backend/main.py`):** `CORSMiddleware` eklendi — `http://localhost:3000` origin'ine izin verildi ✔
 
 ---
 
