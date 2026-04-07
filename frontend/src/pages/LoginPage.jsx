@@ -100,13 +100,19 @@ export default function LoginPage() {
       await login(form.email, form.password)
       navigate('/')
     } catch (err) {
-      const detail = err.response?.data?.detail
-      if (Array.isArray(detail)) {
-        setError(detail[0]?.msg || 'Giriş başarısız. Bilgilerinizi kontrol edin.')
+      const data = err.response?.data || err;
+      const detail = data?.detail;
+
+      if (Array.isArray(detail) && detail.length > 0) {
+        setError(detail[0].msg || 'Giriş başarısız. Bilgilerinizi kontrol edin.');
       } else if (typeof detail === 'string') {
-        setError(detail)
+        setError(detail);
+      } else if (typeof data?.message === 'string') {
+        setError(data.message);
+      } else if (typeof err?.message === 'string') {
+        setError(err.message);
       } else {
-        setError('Bir hata oluştu. Lütfen tekrar deneyin.')
+        setError('Bir hata oluştu. Lütfen tekrar deneyin.');
       }
     } finally {
       setLoading(false)

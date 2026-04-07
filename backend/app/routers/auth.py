@@ -8,7 +8,7 @@ from app.schemas import Token, UserRegister, UserResponse
 from pydantic import BaseModel
 
 class LoginRequest(BaseModel):
-    email: str
+    username: str
     password: str
 
 router = APIRouter()
@@ -70,7 +70,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 def login(body: LoginRequest, db: Session = Depends(get_db)):
-    normalized = str(body.email).strip().lower()
+    normalized = str(body.username).strip().lower()
     user = db.query(User).filter(User.email == normalized).first()
     if user is None:
         raise HTTPException(

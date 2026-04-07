@@ -20,7 +20,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { username: email, password }, {
+    const payload = JSON.stringify({ username: email, password })
+    const res = await api.post('/auth/login', payload, {
       headers: { 'Content-Type': 'application/json' }
     })
     localStorage.setItem('token', res.data.access_token)
@@ -33,6 +34,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token')
     setUser(null)
   }
+
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
