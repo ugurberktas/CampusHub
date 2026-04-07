@@ -101,7 +101,13 @@ export default function LoginPage() {
       navigate('/')
     } catch (err) {
       const detail = err.response?.data?.detail
-      setError(typeof detail === 'string' ? detail : 'Giriş başarısız. Bilgilerinizi kontrol edin.')
+      if (Array.isArray(detail)) {
+        setError(detail[0]?.msg || 'Giriş başarısız. Bilgilerinizi kontrol edin.')
+      } else if (typeof detail === 'string') {
+        setError(detail)
+      } else {
+        setError('Bir hata oluştu. Lütfen tekrar deneyin.')
+      }
     } finally {
       setLoading(false)
     }
@@ -114,7 +120,7 @@ export default function LoginPage() {
           <div style={s.logoText}>Campus Hub</div>
           <div style={s.subtitle}>Hesabınıza giriş yapın</div>
         </div>
-        {error && <div style={s.error}>{error}</div>}
+        {error && <div style={s.error}>{typeof error === 'string' ? error : JSON.stringify(error)}</div>}
         <form onSubmit={handleSubmit}>
           <div style={s.field}>
             <label style={s.label}>E-posta</label>
