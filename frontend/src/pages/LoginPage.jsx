@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const navigate = useNavigate()
   
   const [form, setForm] = useState({ email: '', password: '' })
@@ -19,6 +19,16 @@ export default function LoginPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
   
+  useEffect(() => {
+    if (user) {
+      const role = user.role?.trim()
+      console.log('useEffect redirect - role:', role)
+      if (role === 'sks_staff') navigate('/sks-panel')
+      else if (role === 'club_owner') navigate('/dashboard')
+      else navigate('/')
+    }
+  }, [user, navigate])
+
   const isMobile = windowWidth < 768
 
   const handleSubmit = async (e) => {
@@ -26,15 +36,7 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(form.email, form.password, (user) => {
-        console.log('Login success - received user object:', user)
-        console.log('Strict user role value:', `'${user?.role}'`)
-        
-        const role = user?.role?.trim()
-        if (role === 'sks_staff') navigate('/sks-panel')
-        else if (role === 'club_owner') navigate('/dashboard')
-        else navigate('/')
-      })
+      await login(form.email, form.password)
     } catch (err) {
       const data = err.response?.data || err;
       const detail = data?.detail;
