@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoginPage() {
-  const { login, user } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
   
   const [form, setForm] = useState({ email: '', password: '' })
@@ -19,15 +19,7 @@ export default function LoginPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
   
-  useEffect(() => {
-    if (user) {
-      const role = user.role?.trim()
-      console.log('useEffect redirect - role:', role)
-      if (role === 'sks_staff') navigate('/sks-panel')
-      else if (role === 'club_owner') navigate('/dashboard')
-      else navigate('/')
-    }
-  }, [user, navigate])
+
 
   const isMobile = windowWidth < 768
 
@@ -36,7 +28,10 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(form.email, form.password)
+      const userData = await login(form.email, form.password)
+      const role = userData?.role?.trim()
+      if (role === 'sks_staff') navigate('/sks-panel')
+      else navigate('/login')
     } catch (err) {
       const data = err.response?.data || err;
       const detail = data?.detail;

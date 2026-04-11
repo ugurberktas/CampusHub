@@ -18,36 +18,12 @@ export function AuthProvider({ children }) {
       setLoading(false)
     }
   }, [])
-  const login = async (email, password, onLoginSuccess) => {
-    try {
-      console.log('1. Sending login request...')
-      const res = await api.post('/auth/login', { username: email, password })
-      
-      console.log('2. Login response:', res.data)
-      
-      console.log('3. Saving token:', res.data.access_token)
-      localStorage.setItem('token', res.data.access_token)
-      
-      console.log('4. Fetching /auth/me...')
-      const me = await api.get('/auth/me')
-      
-      console.log('5. User data:', me.data)
-      
-      // Set context state
-      setUser(me.data)
-      
-      // Ensure state flush completes before navigation happens
-      if (onLoginSuccess) {
-        setTimeout(() => {
-          onLoginSuccess(me.data)
-        }, 0)
-      }
-      
-      return me.data
-    } catch (err) {
-      console.error('Login error in AuthContext:', err)
-      throw err
-    }
+  const login = async (email, password) => {
+    const res = await api.post('/auth/login', { username: email, password })
+    localStorage.setItem('token', res.data.access_token)
+    const me = await api.get('/auth/me')
+    setUser(me.data)
+    return me.data
   }
 
   const logout = () => {

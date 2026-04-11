@@ -5,23 +5,35 @@ import LoginPage from './pages/LoginPage'
 import StudentRegisterPage from './pages/StudentRegisterPage'
 import ClubRegisterPage from './pages/ClubRegisterPage'
 import SKSPanel from './pages/SKSPanel'
-import HomePage from './pages/HomePage'
-import ClubsPage from './pages/ClubsPage'
-import ClubDetailPage from './pages/ClubDetailPage'
-import EventDetailPage from './pages/EventDetailPage'
 
 // Require authentication — redirect to /login if not logged in
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return null
+  
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
+        <p style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Yükleniyor...</p>
+      </div>
+    )
+  }
+  
   return user ? children : <Navigate to="/login" replace />
 }
 
 // Redirect already-logged-in users away from auth pages
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return null
-  return user ? <Navigate to="/" replace /> : children
+  
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
+        <p style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Yükleniyor...</p>
+      </div>
+    )
+  }
+  
+  return user ? <Navigate to="/sks-panel" replace /> : children
 }
 
 export default function App() {
@@ -36,13 +48,9 @@ export default function App() {
 
           {/* Protected app routes */}
           <Route path="/sks-panel" element={<PrivateRoute><SKSPanel /></PrivateRoute>} />
-          <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
-          <Route path="/clubs" element={<PrivateRoute><ClubsPage /></PrivateRoute>} />
-          <Route path="/clubs/:id" element={<PrivateRoute><ClubDetailPage /></PrivateRoute>} />
-          <Route path="/events/:id" element={<PrivateRoute><EventDetailPage /></PrivateRoute>} />
 
           {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

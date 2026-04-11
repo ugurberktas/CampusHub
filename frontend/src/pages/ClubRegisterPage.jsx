@@ -6,8 +6,8 @@ export default function ClubRegisterPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
-    full_name: '', email: '', password: '', confirmPassword: '',
-    club_name: '', category: 'Spor', description: ''
+    club_name: '', category: 'Spor', description: '',
+    full_name: '', club_email: '', email: '', phone: '', password: '', confirmPassword: ''
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -77,6 +77,12 @@ export default function ClubRegisterPage() {
       fontWeight: '500',
       color: 'var(--text-secondary)',
       marginBottom: '8px',
+    },
+    note: {
+      fontSize: '11px',
+      color: 'var(--text-muted)',
+      display: 'block',
+      marginTop: '4px'
     },
     input: {
       width: '100%',
@@ -170,12 +176,6 @@ export default function ClubRegisterPage() {
   const handleNext = (e) => {
     e.preventDefault()
     setError('')
-    
-    if (form.password !== form.confirmPassword) {
-      setError('Şifreler eşleşmiyor.')
-      return
-    }
-    
     setStep(2)
   }
 
@@ -184,6 +184,12 @@ export default function ClubRegisterPage() {
     setError('')
     setSuccess('')
     setLoading(true)
+
+    if (form.password !== form.confirmPassword) {
+      setError('Şifreler eşleşmiyor.')
+      setLoading(false)
+      return
+    }
 
     try {
       // 1. Üye kaydı
@@ -210,7 +216,7 @@ export default function ClubRegisterPage() {
       })
       
       // 4. Başarılı durum
-      setSuccess('Kulüp başvurunuz alındı! SKS onayından sonra aktif olacaktır.')
+      setSuccess('Başvurunuz alındı! SKS onayından sonra aktif olacaktır.')
       setTimeout(() => navigate('/login'), 3000)
     } catch (err) {
       const data = err.response?.data || err
@@ -234,12 +240,12 @@ export default function ClubRegisterPage() {
         <div style={s.indicatorContainer}>
           <div style={s.stepItem}>
             <div style={s.circle(step >= 1)}>1</div>
-            <span style={{ color: step >= 1 ? 'var(--text-primary)' : 'var(--text-secondary)'}}>Hesap Bilgileri</span>
+            <span style={{ color: step >= 1 ? 'var(--text-primary)' : 'var(--text-secondary)'}}>Topluluk Bilgileri</span>
           </div>
           <div style={s.line}></div>
           <div style={s.stepItem}>
             <div style={s.circle(step >= 2)}>2</div>
-            <span style={{ color: step >= 2 ? 'var(--text-primary)' : 'var(--text-secondary)'}}>Kulüp Bilgileri</span>
+            <span style={{ color: step >= 2 ? 'var(--text-primary)' : 'var(--text-secondary)'}}>Yetkili Bilgileri</span>
           </div>
         </div>
 
@@ -250,58 +256,7 @@ export default function ClubRegisterPage() {
           {step === 1 && (
             <>
               <div style={s.field}>
-                <label style={s.label}>Ad Soyad</label>
-                <input
-                  style={s.input}
-                  type="text"
-                  value={form.full_name}
-                  onChange={e => setForm({ ...form, full_name: e.target.value })}
-                  required
-                />
-              </div>
-              <div style={s.field}>
-                <label style={s.label}>E-posta</label>
-                <input
-                  style={s.input}
-                  type="email"
-                  value={form.email}
-                  onChange={e => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div style={s.field}>
-                <label style={s.label}>Şifre</label>
-                <input
-                  style={s.input}
-                  type="password"
-                  minLength="8"
-                  value={form.password}
-                  onChange={e => setForm({ ...form, password: e.target.value })}
-                  required
-                />
-              </div>
-              <div style={s.field}>
-                <label style={s.label}>Şifre Tekrar</label>
-                <input
-                  style={s.input}
-                  type="password"
-                  minLength="8"
-                  value={form.confirmPassword}
-                  onChange={e => setForm({ ...form, confirmPassword: e.target.value })}
-                  required
-                />
-              </div>
-              
-              <button style={s.btnPrimary} type="submit" disabled={loading || success}>
-                Devam Et
-              </button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div style={s.field}>
-                <label style={s.label}>Kulüp Adı</label>
+                <label style={s.label}>Topluluk Adı</label>
                 <input
                   style={s.input}
                   type="text"
@@ -332,6 +287,76 @@ export default function ClubRegisterPage() {
                   style={s.textarea}
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+              
+              <button style={s.btnPrimary} type="submit" disabled={loading || success}>
+                Devam Et
+              </button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div style={s.field}>
+                <label style={s.label}>Topluluk Başkanı Adı</label>
+                <input
+                  style={s.input}
+                  type="text"
+                  value={form.full_name}
+                  onChange={e => setForm({ ...form, full_name: e.target.value })}
+                  required
+                />
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Topluluk Maili</label>
+                <input
+                  style={s.input}
+                  type="email"
+                  value={form.club_email}
+                  onChange={e => setForm({ ...form, club_email: e.target.value })}
+                  required
+                />
+                <span style={s.note}>edu.tr uzantılı olmalıdır</span>
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Kişisel Mail</label>
+                <input
+                  style={s.input}
+                  type="email"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+                <span style={s.note}>edu.tr uzantılı olmalıdır</span>
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Telefon (Opsiyonel)</label>
+                <input
+                  style={s.input}
+                  type="text"
+                  value={form.phone}
+                  onChange={e => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Şifre</label>
+                <input
+                  style={s.input}
+                  type="password"
+                  value={form.password}
+                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  required
+                />
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Şifre Tekrar</label>
+                <input
+                  style={s.input}
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={e => setForm({ ...form, confirmPassword: e.target.value })}
+                  required
                 />
               </div>
               

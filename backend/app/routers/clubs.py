@@ -77,7 +77,7 @@ def list_active_clubs(db: Annotated[Session, Depends(get_db)]):
 
 @router.get("/pending", response_model=List[ClubResponse])
 def list_pending_clubs(
-    current_user: Annotated[User, Depends(require_role("sks"))],
+    current_user: Annotated[User, Depends(require_role("sks_staff"))],
     db: Annotated[Session, Depends(get_db)],
 ):
     """SKS only – returns all clubs with status='pending'."""
@@ -95,7 +95,7 @@ def get_club(club_id, db: Annotated[Session, Depends(get_db)]):
 @router.put("/{club_id}/approve", response_model=ClubResponse)
 def approve_club(
     club_id,
-    current_user: Annotated[User, Depends(require_role("sks"))],
+    current_user: Annotated[User, Depends(require_role("sks_staff"))],
     db: Annotated[Session, Depends(get_db)],
 ):
     """SKS only – approve a pending club."""
@@ -109,7 +109,7 @@ def approve_club(
 @router.put("/{club_id}/reject", response_model=ClubResponse)
 def reject_club(
     club_id,
-    current_user: Annotated[User, Depends(require_role("sks"))],
+    current_user: Annotated[User, Depends(require_role("sks_staff"))],
     db: Annotated[Session, Depends(get_db)],
 ):
     """SKS only – reject a pending club."""
@@ -123,7 +123,7 @@ def reject_club(
 @router.put("/{club_id}/suspend", response_model=ClubResponse)
 def suspend_club(
     club_id,
-    current_user: Annotated[User, Depends(require_role("sks"))],
+    current_user: Annotated[User, Depends(require_role("sks_staff"))],
     db: Annotated[Session, Depends(get_db)],
 ):
     """SKS only – suspend a club."""
