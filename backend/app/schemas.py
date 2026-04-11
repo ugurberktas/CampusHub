@@ -28,6 +28,18 @@ class UserResponse(BaseModel):
     is_verified: bool
 
 
+class UserListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    full_name: str
+    email: str
+    role: str
+    is_verified: bool
+    created_at: Optional[datetime] = None
+
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -43,6 +55,10 @@ class ClubCreate(BaseModel):
     name: str
     description: Optional[str] = None
     category: Optional[str] = None
+    advisor_name: Optional[str] = None
+    advisor_faculty: Optional[str] = None
+    advisor_email: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 class ClubResponse(BaseModel):
@@ -55,6 +71,9 @@ class ClubResponse(BaseModel):
     status: str
     logo_url: Optional[str]
     banner_url: Optional[str]
+    advisor_name: Optional[str] = None
+    advisor_faculty: Optional[str] = None
+    advisor_email: Optional[str] = None
     university_id: UUID
     created_at: datetime
     follower_count: int = 0

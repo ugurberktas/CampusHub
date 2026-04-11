@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
@@ -12,8 +12,14 @@ export default function SKSPanel() {
   const [stats, setStats] = useState({ pendingCount: 0, approvedCount: 0, eventCount: 0 })
   const [pendingClubs, setPendingClubs] = useState([])
   const [approvedClubs, setApprovedClubs] = useState([])
+  const [users, setUsers] = useState([])
   const [dataLoading, setDataLoading] = useState(false)
   
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedClub, setSelectedClub] = useState(null)
+  const [modalLoading, setModalLoading] = useState(false)
+  const [clubMemberCount, setClubMemberCount] = useState(0)
+
   const [toast, setToast] = useState(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
@@ -30,67 +36,112 @@ export default function SKSPanel() {
     setTimeout(() => setToast(null), 3000)
   }
 
+  const fetchDashboardStats = useCallback(async () => {
+    try {
+      const [pendingRes, approvedRes, eventsRes] = await Promise.all([
+        api.get('/clubs/pending'),
+        api.get('/clubs?status=active').catch(() => api.get('/clubs')), // Fallback if query unsupported
+        api.get('/events')
+      ])
+      
+      let approvedCount = 0
+      if (approvedRes.data && Array.isArray(approvedRes.data)) {
+        approvedCount = approvedRes.data.filter(c => c.status === 'active').length
+      }
+      
+      setStats({
+        pendingCount: pendingRes.data?.length || 0,
+        approvedCount: approvedCount,
+        eventCount: eventsRes.data?.length || 0
+      })
+    } catch (err) {
+      console.error('Error fetching stats:', err)
+    }
+  }, [])
+
+  const fetchPendingClubs = useCallback(async () => {
+    setDataLoading(true)
+    try {
+      const res = await api.get('/clubs/pending')
+      const clubs = res.data || []
+      
+      const clubsWithDetails = await Promise.all(
+        clubs.map(async (club) => {
+          try {
+            const memRes = await api.get(`/clubs/${club.id}/members`)
+            const members = memRes.data || []
+            const owner = members.find(m => m.role === 'owner')
+            
+            return {
+              ...club,
+              owner_name: owner?.user?.full_name || owner?.full_name || 'Bilinmiyor',
+              owner_email: owner?.user?.email || owner?.email || 'Bilinmiyor',
+              owner_phone: owner?.user?.phone || owner?.phone || 'Belirtilmedi'
+            }
+          } catch (e) {
+            return {
+              ...club,
+              owner_name: 'Bilinmiyor',
+              owner_email: 'Bilinmiyor',
+              owner_phone: 'Belirtilmedi'
+            }
+          }
+        })
+      )
+      
+      setPendingClubs(clubsWithDetails)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setDataLoading(false)
+    }
+  }, [])
+
+  const fetchApprovedClubs = useCallback(async () => {
+    setDataLoading(true)
+    try {
+      let res = await api.get('/clubs?status=active').catch(() => api.get('/clubs'))
+      const clubs = res.data || []
+      setApprovedClubs(clubs.filter(c => c.status === 'active'))
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setDataLoading(false)
+    }
+  }, [])
+
+  const fetchUsers = useCallback(async () => {
+    setDataLoading(true)
+    try {
+      const res = await api.get('/auth/users')
+      console.log('Users fetched:', res.data)
+      setUsers(res.data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setDataLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (!user || user.role !== 'sks_staff') return
     
-    const fetchDashboardStats = async () => {
-      try {
-        const [pendingRes, approvedRes, eventsRes] = await Promise.all([
-          api.get('/clubs/pending'),
-          api.get('/clubs?status=approved').catch(() => api.get('/clubs')), // Fallback if query unsupported
-          api.get('/events')
-        ])
-        
-        let approvedCount = 0
-        if (approvedRes.data && Array.isArray(approvedRes.data)) {
-          approvedCount = approvedRes.data.filter(c => c.status === 'approved').length
-        }
-        
-        setStats({
-          pendingCount: pendingRes.data?.length || 0,
-          approvedCount: approvedCount,
-          eventCount: eventsRes.data?.length || 0
-        })
-      } catch (err) {
-        console.error('Error fetching stats:', err)
-      }
-    }
+    // Temizle
+    setSearchQuery('')
+    setSelectedClub(null)
     
     if (activeTab === 'home') fetchDashboardStats()
     else if (activeTab === 'pending') fetchPendingClubs()
     else if (activeTab === 'approved') fetchApprovedClubs()
-  }, [activeTab, user])
-
-  const fetchPendingClubs = async () => {
-    setDataLoading(true)
-    try {
-      const res = await api.get('/clubs/pending')
-      setPendingClubs(res.data || [])
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setDataLoading(false)
-    }
-  }
-
-  const fetchApprovedClubs = async () => {
-    setDataLoading(true)
-    try {
-      let res = await api.get('/clubs?status=approved').catch(() => api.get('/clubs'))
-      const clubs = res.data || []
-      // Defensive fallback filtering
-      setApprovedClubs(clubs.filter(c => c.status === 'approved'))
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setDataLoading(false)
-    }
-  }
+    else if (activeTab === 'users') fetchUsers()
+  }, [activeTab, user, fetchDashboardStats, fetchPendingClubs, fetchApprovedClubs, fetchUsers])
 
   const handleApprove = async (id) => {
     try {
       await api.put(`/clubs/${id}/approve`)
       setPendingClubs(prev => prev.filter(c => c.id !== id))
+      fetchApprovedClubs()
+      fetchDashboardStats()
       showToast('Topluluk başarıyla onaylandı!')
     } catch (err) {
       console.error(err)
@@ -102,10 +153,32 @@ export default function SKSPanel() {
     try {
       await api.put(`/clubs/${id}/reject`)
       setPendingClubs(prev => prev.filter(c => c.id !== id))
+      fetchDashboardStats() // Refreshes the pendingCount directly
       showToast('Topluluk reddedildi.')
     } catch (err) {
       console.error(err)
       showToast('İşlem başarısız oldu.')
+    }
+  }
+
+  const handleRowClick = async (club) => {
+    const clubData = { ...club, owner_name: '-', owner_department: '-', owner_email: '-' }
+    setSelectedClub(clubData)
+    setModalLoading(true)
+    try {
+      const res = await api.get(`/clubs/${club.id}/members`)
+      setClubMemberCount(res.data?.length || 0)
+      const owner = res.data?.find(m => m.role === 'owner')
+      setSelectedClub(prev => ({
+        ...prev,
+        owner_name: owner?.user?.full_name || owner?.full_name || '-',
+        owner_email: owner?.user?.email || owner?.email || '-',
+        owner_department: owner?.user?.department || owner?.department || '-'
+      }))
+    } catch (err) {
+      setClubMemberCount(0)
+    } finally {
+      setModalLoading(false)
     }
   }
 
@@ -180,12 +253,31 @@ export default function SKSPanel() {
     main: {
       flex: 1,
       padding: isMobile ? '16px' : '40px',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      position: 'relative'
+    },
+    headerRow: {
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      justifyContent: 'space-between',
+      alignItems: isMobile ? 'flex-start' : 'center',
+      marginBottom: '24px',
+      gap: '16px'
     },
     title: {
       fontSize: '28px',
       fontWeight: '700',
-      marginBottom: '24px',
+      color: 'var(--text-primary)',
+      margin: 0
+    },
+    searchInput: {
+      background: 'white',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      padding: '8px 16px',
+      width: isMobile ? '100%' : '250px',
+      outline: 'none',
+      fontSize: '14px',
       color: 'var(--text-primary)'
     },
     statGrid: {
@@ -268,10 +360,28 @@ export default function SKSPanel() {
       color: 'var(--text-secondary)',
       lineHeight: '1.5'
     },
+    contactCard: {
+      marginTop: '12px',
+      padding: '12px',
+      background: 'var(--bg-surface)',
+      borderRadius: '6px',
+      border: '1px solid var(--border)'
+    },
+    contactTitle: {
+      fontSize: '13px',
+      fontWeight: '600',
+      marginBottom: '6px',
+      color: 'var(--text-primary)'
+    },
+    contactLine: {
+      fontSize: '13px',
+      color: 'var(--text-secondary)',
+      marginBottom: '2px'
+    },
     clubDate: {
       fontSize: '12px',
       color: 'var(--text-muted)',
-      marginTop: '8px'
+      marginTop: '12px'
     },
     actionGroup: {
       display: 'flex',
@@ -319,7 +429,12 @@ export default function SKSPanel() {
       padding: '16px',
       borderBottom: '1px solid var(--border)',
       fontSize: '14px',
-      color: 'var(--text-primary)'
+      color: 'var(--text-primary)',
+      cursor: 'pointer'
+    },
+    trHover: {
+      transition: 'background 0.2s',
+      ':hover': { background: '#fcfcfc' }
     },
     emptyState: {
       padding: '40px',
@@ -328,14 +443,71 @@ export default function SKSPanel() {
       background: 'white',
       borderRadius: 'var(--radius-sm)',
       border: '1px dashed var(--border)'
+    },
+    modalOverlay: {
+      position: 'fixed',
+      top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 2000,
+      padding: '16px'
+    },
+    modalContent: {
+      background: 'white',
+      width: '100%',
+      maxWidth: '500px',
+      borderRadius: 'var(--radius)',
+      boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+      overflow: 'hidden',
+      animation: 'modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    modalHeader: {
+      padding: '20px 24px',
+      borderBottom: '1px solid var(--border)',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: 'var(--bg-surface)'
+    },
+    modalTitle: {
+      margin: 0,
+      fontSize: '18px',
+      fontWeight: '700',
+      color: 'var(--text-primary)'
+    },
+    modalClose: {
+      background: 'transparent',
+      border: 'none',
+      fontSize: '24px',
+      lineHeight: '1',
+      cursor: 'pointer',
+      color: 'var(--text-secondary)'
+    },
+    modalBody: {
+      padding: '24px',
+      fontSize: '14px',
+      color: 'var(--text-primary)'
+    },
+    modalRow: {
+      marginBottom: '12px',
+      lineHeight: '1.5'
     }
   }
 
   const renderContent = () => {
+    const filteredPending = pendingClubs.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    const filteredApproved = approvedClubs.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+
     if (activeTab === 'home') {
       return (
         <div>
-          <h2 style={s.title}>Genel Bakış</h2>
+          <div style={s.headerRow}>
+            <h2 style={s.title}>Genel Bakış</h2>
+          </div>
           <div style={s.statGrid}>
             <div style={s.statCard}>
               <div style={s.statNumber}>{stats.pendingCount}</div>
@@ -361,19 +533,36 @@ export default function SKSPanel() {
     if (activeTab === 'pending') {
       return (
         <div>
-          <h2 style={s.title}>Topluluk Başvuruları</h2>
+          <div style={s.headerRow}>
+            <h2 style={s.title}>Topluluk Başvuruları</h2>
+            <input 
+              type="text" 
+              placeholder="Topluluk ara..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={s.searchInput}
+            />
+          </div>
           {dataLoading ? (
             <div>Yükleniyor...</div>
-          ) : pendingClubs.length === 0 ? (
-            <div style={s.emptyState}>Bekleyen başvuru bulunmuyor 🎉</div>
+          ) : filteredPending.length === 0 ? (
+            <div style={s.emptyState}>{searchQuery ? 'Aramanıza uygun başvuru bulunamadı' : 'Bekleyen başvuru bulunmuyor 🎉'}</div>
           ) : (
             <div style={s.cardList}>
-              {pendingClubs.map(club => (
+              {filteredPending.map(club => (
                 <div key={club.id} style={s.clubCard}>
                   <div style={s.clubInfo}>
                     <div style={s.clubName}>{club.name}</div>
                     <div style={s.clubCategory}>{club.category}</div>
                     <div style={s.clubDesc}>{club.description || 'Açıklama belirtilmemiş.'}</div>
+
+                    <div style={s.contactCard}>
+                      <div style={s.contactTitle}>Sorumlu Kişi Bilgileri</div>
+                      <div style={s.contactLine}><strong>Ad Soyad:</strong> {club.owner_name}</div>
+                      <div style={s.contactLine}><strong>E-posta:</strong> {club.owner_email}</div>
+                      <div style={s.contactLine}><strong>Telefon:</strong> {club.owner_phone}</div>
+                    </div>
+
                     <div style={s.clubDate}>Oluşturulma: {new Date(club.created_at).toLocaleDateString('tr-TR')}</div>
                   </div>
                   <div style={s.actionGroup}>
@@ -391,11 +580,20 @@ export default function SKSPanel() {
     if (activeTab === 'approved') {
       return (
         <div>
-          <h2 style={s.title}>Onaylanan Topluluklar</h2>
+          <div style={s.headerRow}>
+            <h2 style={s.title}>Onaylanan Topluluklar</h2>
+            <input 
+              type="text" 
+              placeholder="Topluluk ara..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={s.searchInput}
+            />
+          </div>
           {dataLoading ? (
             <div>Yükleniyor...</div>
-          ) : approvedClubs.length === 0 ? (
-            <div style={s.emptyState}>Henüz onaylanmış bir topluluk bulunmuyor.</div>
+          ) : filteredApproved.length === 0 ? (
+            <div style={s.emptyState}>{searchQuery ? 'Aramanıza uygun topluluk bulunamadı' : 'Henüz onaylanmış bir topluluk bulunmuyor.'}</div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={s.table}>
@@ -408,8 +606,14 @@ export default function SKSPanel() {
                   </tr>
                 </thead>
                 <tbody>
-                  {approvedClubs.map(club => (
-                    <tr key={club.id}>
+                  {filteredApproved.map(club => (
+                    <tr 
+                      key={club.id} 
+                      onClick={() => handleRowClick(club)} 
+                      style={{ cursor: 'pointer' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
                       <td style={{ ...s.td, fontWeight: '600' }}>{club.name}</td>
                       <td style={s.td}><span style={s.clubCategory}>{club.category}</span></td>
                       <td style={s.td}>✅ Onaylı</td>
@@ -420,6 +624,70 @@ export default function SKSPanel() {
               </table>
             </div>
           )}
+        </div>
+      )
+    }
+
+    if (activeTab === 'users') {
+      const filteredUsers = users.filter(u => 
+        u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+
+      const getRoleLabel = (role) => {
+        if (role === 'student') return 'Öğrenci'
+        if (role === 'club_owner') return 'Kulüp Yöneticisi'
+        if (role === 'sks_staff') return 'SKS Personeli'
+        return role
+      }
+
+      return (
+        <div>
+          <div style={s.headerRow}>
+            <h2 style={s.title}>Kullanıcılar</h2>
+            <input 
+              type="text" 
+              placeholder="İsim veya e-posta ara..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={s.searchInput}
+            />
+          </div>
+          {dataLoading && <div>Yükleniyor...</div>}
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={s.table}>
+              <thead>
+                <tr>
+                  <th style={s.th}>Ad Soyad</th>
+                  <th style={s.th}>E-posta</th>
+                  <th style={s.th}>Rol</th>
+                  <th style={s.th}>Kayıt Tarihi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.length === 0 && !dataLoading && (
+                  <tr>
+                    <td colSpan="4" style={s.emptyState}>
+                      {searchQuery ? 'Aramanıza uygun kullanıcı bulunamadı' : 'Kayıtlı kullanıcı bulunmuyor'}
+                    </td>
+                  </tr>
+                )}
+                {filteredUsers.map(u => (
+                  <tr 
+                    key={u.id}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <td style={{ ...s.td, fontWeight: '600' }}>{u.full_name}</td>
+                    <td style={s.td}>{u.email}</td>
+                    <td style={s.td}><span style={s.clubCategory}>{getRoleLabel(u.role)}</span></td>
+                    <td style={s.td}>{u.created_at ? new Date(u.created_at).toLocaleDateString('tr-TR') : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )
     }
@@ -435,6 +703,10 @@ export default function SKSPanel() {
         @keyframes slideIn {
           from { transform: translateY(100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes modalIn {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
         }
       `}</style>
       <div style={s.layout}>
@@ -478,7 +750,33 @@ export default function SKSPanel() {
           {renderContent()}
         </div>
 
+        {/* Toast */}
         {toast && <div style={s.toast}>{toast}</div>}
+
+        {/* Modal Overlay */}
+        {selectedClub && (
+          <div style={s.modalOverlay} onClick={() => setSelectedClub(null)}>
+            <div style={s.modalContent} onClick={e => e.stopPropagation()}>
+              <div style={s.modalHeader}>
+                <h3 style={s.modalTitle}>Topluluk Detayları</h3>
+                <button style={s.modalClose} onClick={() => setSelectedClub(null)}>×</button>
+              </div>
+              <div style={s.modalBody}>
+                <div style={s.modalRow}><strong>Kulüp Adı:</strong> {selectedClub.name}</div>
+                <div style={s.modalRow}><strong>Kategori:</strong> {selectedClub.category}</div>
+                <div style={s.modalRow}><strong>Açıklama:</strong> {selectedClub.description || '-'}</div>
+                <div style={s.modalRow}><strong>Kayıt Tarihi:</strong> {new Date(selectedClub.created_at).toLocaleDateString('tr-TR')}</div>
+                <hr style={{ margin: '16px 0', borderColor: 'var(--border)', borderStyle: 'solid', borderWidth: '1px 0 0 0' }} />
+                <div style={s.modalRow}><strong>Danışman Adı:</strong> {selectedClub.owner_name}</div>
+                <div style={s.modalRow}><strong>Danışman Fakültesi:</strong> {selectedClub.owner_department}</div>
+                <div style={s.modalRow}><strong>Danışman Mail:</strong> {selectedClub.owner_email}</div>
+                <div style={s.modalRow}>
+                  <strong>Üye Sayısı:</strong> {modalLoading ? 'Yükleniyor...' : clubMemberCount}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )

@@ -55,6 +55,9 @@ class Club(Base):
     status = Column(String(50), default="pending")
     logo_url = Column(String(500), nullable=True)
     banner_url = Column(String(500), nullable=True)
+    advisor_name = Column(String(255), nullable=True)
+    advisor_faculty = Column(String(255), nullable=True)
+    advisor_email = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

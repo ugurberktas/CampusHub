@@ -7,6 +7,7 @@ export default function ClubRegisterPage() {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     club_name: '', category: 'Spor', description: '',
+    advisor_name: '', advisor_faculty: '', advisor_email: '', logo_url: '',
     full_name: '', club_email: '', email: '', phone: '', password: '', confirmPassword: ''
   })
   const [error, setError] = useState('')
@@ -212,7 +213,11 @@ export default function ClubRegisterPage() {
       await api.post('/clubs', {
         name: form.club_name,
         category: form.category,
-        description: form.description
+        description: form.description,
+        advisor_name: form.advisor_name,
+        advisor_faculty: form.advisor_faculty,
+        advisor_email: form.advisor_email,
+        logo_url: form.logo_url
       })
       
       // 4. Başarılı durum
@@ -287,6 +292,48 @@ export default function ClubRegisterPage() {
                   style={s.textarea}
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+
+              <div style={s.field}>
+                <label style={s.label}>Danışman Adı</label>
+                <input
+                  style={s.input}
+                  type="text"
+                  value={form.advisor_name}
+                  onChange={e => setForm({ ...form, advisor_name: e.target.value })}
+                  required
+                />
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Danışman Fakültesi</label>
+                <input
+                  style={s.input}
+                  type="text"
+                  value={form.advisor_faculty}
+                  onChange={e => setForm({ ...form, advisor_faculty: e.target.value })}
+                  required
+                />
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Danışman Mail</label>
+                <input
+                  style={s.input}
+                  type="email"
+                  value={form.advisor_email}
+                  onChange={e => setForm({ ...form, advisor_email: e.target.value })}
+                  required
+                />
+                <span style={s.note}>edu.tr uzantılı olmalıdır</span>
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Logo URL (Opsiyonel)</label>
+                <input
+                  style={s.input}
+                  type="url"
+                  placeholder="https://..."
+                  value={form.logo_url}
+                  onChange={e => setForm({ ...form, logo_url: e.target.value })}
                 />
               </div>
               

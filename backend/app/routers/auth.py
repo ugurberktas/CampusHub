@@ -1,10 +1,11 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.auth import create_access_token, get_current_user, get_password_hash, verify_password
+from app.auth import create_access_token, get_current_user, get_password_hash, verify_password, require_role
 from app.database import get_db
 from app.models import University, User
-from app.schemas import Token, UserRegister, UserResponse
+from app.schemas import Token, UserRegister, UserResponse, UserListResponse
 from pydantic import BaseModel
 
 class LoginRequest(BaseModel):
@@ -90,3 +91,13 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def read_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.get("/users", response_model=List[UserListResponse])
+def list_users(
+    current_user: User = Depends(require_role("sks_staff")),
+    db: Session = Depends(get_db)
+):
+    users = db.query(User).all()
+    return users
+
