@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import SKSLoginPage from './pages/SKSLoginPage'
 import StudentRegisterPage from './pages/StudentRegisterPage'
 import ClubRegisterPage from './pages/ClubRegisterPage'
+import ClubPanel from './pages/ClubPanel'
 
 // ─── Loading spinner shared between guards ────────────────────────────────────
 function LoadingScreen() {
@@ -24,6 +25,17 @@ function PrivateRoute({ children }) {
   if (loading) return <LoadingScreen />
 
   return user ? children : <Navigate to="/login" replace />
+}
+
+// ─── ProtectedRoute ───────────────────────────────────────────────────────────
+function ProtectedRoute({ children, role }) {
+  const { user, loading } = useAuth()
+
+  if (loading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  if (role && user.role !== role) return <Navigate to="/" replace />
+
+  return children
 }
 
 // ─── PublicRoute ──────────────────────────────────────────────────────────────
@@ -72,6 +84,7 @@ export default function App() {
           <Route path="/clubs"    element={<PrivateRoute><PlaceholderPage title="Kulüpler" /></PrivateRoute>} />
           <Route path="/events"   element={<PrivateRoute><PlaceholderPage title="Etkinlikler" /></PrivateRoute>} />
           <Route path="/profile"  element={<PrivateRoute><PlaceholderPage title="Profil" /></PrivateRoute>} />
+          <Route path="/club-panel" element={<ProtectedRoute role="club_owner"><ClubPanel /></ProtectedRoute>} />
 
 
           {/* ── Catch-all ── */}

@@ -1,7 +1,10 @@
+import os
+import shutil
+from uuid import uuid4
 from datetime import datetime, timezone
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
@@ -33,6 +36,7 @@ def _event_to_response(event: Event, db: Session) -> EventResponse:
         expected_attendance_rate=event.expected_attendance_rate,
         event_date=event.event_date,
         status=event.status,
+        image_url=event.image_url,
         club_id=event.club_id,
         created_at=event.created_at,
         registration_count=_reg_count(event.id, db),
@@ -68,28 +72,44 @@ def _assert_club_staff(user: User, club_id, db: Session):
 
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 def create_event(
-    payload: EventCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[Session, Depends(get_db)],
+    title: Annotated[str, Form()],
+    club_id: Annotated[str, Form()],
+    event_date: Annotated[datetime, Form()],
+    description: Annotated[Optional[str], Form()] = None,
+    location: Annotated[Optional[str], Form()] = None,
+    capacity: Annotated[Optional[int], Form()] = None,
+    expected_attendance_rate: Annotated[float, Form()] = 0.4,
+    image: Annotated[Optional[UploadFile], File()] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Authenticated club owner or core_team – create an event for their club."""
-    # Verify caller is staff of the specified club
-    _assert_club_staff(current_user, payload.club_id, db)
+    _assert_club_staff(current_user, club_id, db)
 
-    # Verify the club actually exists
-    club = db.query(Club).filter(Club.id == payload.club_id).first()
+    club = db.query(Club).filter(Club.id == club_id).first()
     if not club:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Club not found")
 
+    image_url = None
+    if image:
+        os.makedirs("uploads", exist_ok=True)
+        ext = os.path.splitext(image.filename)[1]
+        unique_filename = f"{uuid4()}{ext}"
+        filepath = os.path.join("uploads", unique_filename)
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        image_url = f"/uploads/{unique_filename}"
+
     event = Event(
-        club_id=payload.club_id,
-        title=payload.title,
-        description=payload.description,
-        location=payload.location,
-        capacity=payload.capacity,
-        expected_attendance_rate=payload.expected_attendance_rate,
-        event_date=payload.event_date,
+        club_id=club_id,
+        title=title,
+        description=description,
+        location=location,
+        capacity=capacity,
+        expected_attendance_rate=expected_attendance_rate,
+        event_date=event_date,
         status="upcoming",
+        image_url=image_url,
     )
     db.add(event)
     db.commit()
@@ -98,15 +118,18 @@ def create_event(
 
 
 @router.get("", response_model=List[EventResponse])
-def list_upcoming_events(db: Annotated[Session, Depends(get_db)]):
-    """Public – returns upcoming events ordered by event_date ascending."""
+def list_upcoming_events(
+    db: Annotated[Session, Depends(get_db)],
+    club_id: Optional[str] = None
+):
+    """Public – returns upcoming events ordered by event_date ascending. Filterable by club_id."""
     now = datetime.now(timezone.utc).replace(tzinfo=None)
-    events = (
-        db.query(Event)
-        .filter(Event.status == "upcoming", Event.event_date >= now)
-        .order_by(Event.event_date.asc())
-        .all()
-    )
+    query = db.query(Event).filter(Event.status == "upcoming", Event.event_date >= now)
+    
+    if club_id:
+        query = query.filter(Event.club_id == club_id)
+        
+    events = query.order_by(Event.event_date.asc()).all()
     return [_event_to_response(e, db) for e in events]
 
 

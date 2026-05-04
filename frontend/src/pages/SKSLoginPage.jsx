@@ -18,8 +18,7 @@ export default function SKSLoginPage() {
       const userData = await login(form.email, form.password)
       const role = userData?.role?.trim()
       if (role === 'sks_staff') {
-        // /sks-panel rotası kaldırıldı — yönlendirme devre dışı
-        setError('SKS Paneli şu an bakımda. Lütfen daha sonra tekrar deneyin.')
+        navigate('/sks-panel')
       } else {
         setError('Bu hesap SKS Personeli yetkisine sahip değil.')
       }

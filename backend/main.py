@@ -9,6 +9,8 @@ from app.routers.clubs import router as clubs_router
 from app.routers.events import router as events_router
 from app.routers.sks import router as sks_router
 
+from fastapi.staticfiles import StaticFiles
+
 app = FastAPI(title="Campus Hub API", version="0.1.0")
 
 app.add_middleware(
@@ -23,6 +25,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+import os
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(auth_router, prefix="/auth")
 app.include_router(clubs_router, prefix="/clubs")

@@ -95,6 +95,7 @@ class Event(Base):
     expected_attendance_rate = Column(Float, default=0.4)
     event_date = Column(DateTime, nullable=False)
     status = Column(String(50), default="upcoming")
+    image_url = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

@@ -15,6 +15,17 @@ def run_migrations():
                 print("✅ Added 'grade' column successfully.")
             else:
                 print("✅ 'grade' column already exists in 'users' table.")
+            
+            # Check if image_url column exists in events table
+            result2 = connection.execute(text(
+                "SELECT column_name FROM information_schema.columns WHERE table_name='events' AND column_name='image_url'"
+            ))
+            if not result2.fetchone():
+                print("⏳ Adding 'image_url' column to 'events' table...")
+                connection.execute(text("ALTER TABLE events ADD COLUMN image_url VARCHAR(500)"))
+                print("✅ Added 'image_url' column successfully.")
+            else:
+                print("✅ 'image_url' column already exists in 'events' table.")
     except Exception as e:
         print(f"❌ Migration failed: {e}")
 

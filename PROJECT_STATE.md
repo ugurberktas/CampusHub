@@ -20,6 +20,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 1.  **Proje İskeleti:** Klasör yapısı, `.gitignore`, `.env`, `requirements.txt` oluşturuldu.
 2.  **Docker Kurulumu:** PostgreSQL 15, pgAdmin ve FastAPI servisleri ayağa kaldırıldı ve birbirine bağlandı.
+3.  **Kulüp Paneli:** Kulüp sahipleri için `/club-panel` ekranı oluşturuldu. Üye yönetimi (çıkarma), etkinlik yönetimi ve görsel upload destekli yeni etkinlik oluşturma özellikleri backend ve frontend'e eklendi.
+4.  **Hata Düzeltmeleri:** `LoginPage` ve `SKSLoginPage` üzerindeki routing eksiklikleri giderildi. `ClubRegisterPage` kaynaklı `/auth/register` endpoint'indeki 422 hataları `schemas.py` üzerinde alanlar opsiyonel yapılarak çözüldü.
 3.  **Veritabanı Modelleri:** SQLAlchemy ile 15 tablo oluşturuldu:
     *   `universities`, `users`, `clubs`, `club_members`, `posts`, `events`, `event_registrations`, `attendance`, `certificates`, `salons`, `salon_reservations`, `applications`, `follows`, `notifications`, `interest_areas`
 4.  **Auth Sistemi (`feature/auth`):** JWT, rol sistemi, `.edu.tr` doğrulama, register/login/me endpoint'leri ✔

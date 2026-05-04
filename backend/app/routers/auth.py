@@ -46,7 +46,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         db.query(University).filter(University.domain == domain).first()
     )
     if university is None:
-        university = University(name=body.university, domain=domain)
+        university = University(name=body.university or domain, domain=domain)
         db.add(university)
         db.flush()
 

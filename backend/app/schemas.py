@@ -9,9 +9,9 @@ class UserRegister(BaseModel):
     email: EmailStr
     full_name: str
     password: str
-    university: str
-    department: str
-    grade: str
+    university: Optional[str] = None
+    department: Optional[str] = None
+    grade: Optional[str] = None
 
 
 class UserLogin(BaseModel):
@@ -93,6 +93,20 @@ class ClubMemberResponse(BaseModel):
     joined_at: datetime
 
 
+class ClubMemberDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    club_id: UUID
+    role: str
+    joined_at: datetime
+    full_name: str
+    email: str
+    department: Optional[str]
+    grade: Optional[str]
+
+
 # ── Event Schemas ─────────────────────────────────────────────────────────────
 
 class EventCreate(BaseModel):
@@ -116,6 +130,7 @@ class EventResponse(BaseModel):
     expected_attendance_rate: float
     event_date: datetime
     status: str
+    image_url: Optional[str]
     club_id: UUID
     created_at: datetime
     registration_count: int = 0

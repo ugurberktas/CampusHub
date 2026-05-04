@@ -92,6 +92,24 @@ def list_pending_clubs(
     return [_club_to_response(c, db) for c in clubs]
 
 
+@router.get("/my-club", response_model=ClubResponse)
+def get_my_club(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Club owner only - get the club they own."""
+    membership = (
+        db.query(ClubMember)
+        .filter(ClubMember.user_id == current_user.id, ClubMember.role == "owner")
+        .first()
+    )
+    if not membership:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You do not own any club")
+    
+    club = _get_club_or_404(membership.club_id, db)
+    return _club_to_response(club, db)
+
+
 @router.get("/{club_id}", response_model=ClubResponse)
 def get_club(club_id, db: Annotated[Session, Depends(get_db)]):
     """Public – returns a single club detail."""
@@ -199,7 +217,7 @@ def add_member(
     return new_member
 
 
-@router.get("/{club_id}/members", response_model=List[ClubMemberResponse])
+@router.get("/{club_id}/members", response_model=List[dict])
 def list_members(
     club_id,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -207,5 +225,61 @@ def list_members(
 ):
     """Authenticated users – list members of a club."""
     _get_club_or_404(club_id, db)
-    members = db.query(ClubMember).filter(ClubMember.club_id == club_id).all()
-    return members
+    
+    results = (
+        db.query(ClubMember, User)
+        .join(User, ClubMember.user_id == User.id)
+        .filter(ClubMember.club_id == club_id)
+        .all()
+    )
+    
+    response = []
+    for member, user in results:
+        response.append({
+            "id": member.id,
+            "user_id": member.user_id,
+            "club_id": member.club_id,
+            "role": member.role,
+            "joined_at": member.joined_at,
+            "full_name": user.full_name,
+            "email": user.email,
+            "department": user.department,
+            "grade": user.grade,
+        })
+    return response
+
+
+@router.delete("/{club_id}/members/{user_id}")
+def remove_member(
+    club_id,
+    user_id,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Club owner only - remove a member."""
+    club = _get_club_or_404(club_id, db)
+    
+    # Check if caller is owner
+    membership = (
+        db.query(ClubMember)
+        .filter(ClubMember.club_id == club.id, ClubMember.user_id == current_user.id, ClubMember.role == "owner")
+        .first()
+    )
+    if not membership:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only club owners can remove members")
+    
+    # Cannot remove yourself if you are owner
+    if str(user_id) == str(current_user.id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot remove yourself")
+
+    target_membership = (
+        db.query(ClubMember)
+        .filter(ClubMember.club_id == club.id, ClubMember.user_id == user_id)
+        .first()
+    )
+    if not target_membership:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member not found")
+        
+    db.delete(target_membership)
+    db.commit()
+    return {"message": "Member removed successfully"}
