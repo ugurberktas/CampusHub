@@ -5,7 +5,6 @@ import LoginPage from './pages/LoginPage'
 import SKSLoginPage from './pages/SKSLoginPage'
 import StudentRegisterPage from './pages/StudentRegisterPage'
 import ClubRegisterPage from './pages/ClubRegisterPage'
-import SKSPanel from './pages/SKSPanel'
 
 // ─── Loading spinner shared between guards ────────────────────────────────────
 function LoadingScreen() {
@@ -28,9 +27,9 @@ function PrivateRoute({ children }) {
 }
 
 // ─── PublicRoute ──────────────────────────────────────────────────────────────
-// Used ONLY on /login, /register, /register-club.
+// Used ONLY on /login, /sks-login, /register, /register-club.
 // Logged-in users are redirected away so they don't land on auth pages.
-//   - sks_staff  → /sks-panel
+//   - club_owner → /club-panel
 //   - everyone else → /
 // All other routes (protected pages) pass through PrivateRoute directly and
 // are never wrapped in PublicRoute, so this does NOT cause redirect loops.
@@ -40,7 +39,6 @@ function PublicRoute({ children }) {
   if (loading) return <LoadingScreen />
 
   if (user) {
-    if (user.role === 'sks_staff') return <Navigate to="/sks-panel" replace />
     if (user.role === 'club_owner') return <Navigate to="/club-panel" replace />
     return <Navigate to="/" replace />
   }
@@ -74,7 +72,7 @@ export default function App() {
           <Route path="/clubs"    element={<PrivateRoute><PlaceholderPage title="Kulüpler" /></PrivateRoute>} />
           <Route path="/events"   element={<PrivateRoute><PlaceholderPage title="Etkinlikler" /></PrivateRoute>} />
           <Route path="/profile"  element={<PrivateRoute><PlaceholderPage title="Profil" /></PrivateRoute>} />
-          <Route path="/sks-panel" element={<PrivateRoute><SKSPanel /></PrivateRoute>} />
+
 
           {/* ── Catch-all ── */}
           <Route path="*" element={<Navigate to="/login" replace />} />
