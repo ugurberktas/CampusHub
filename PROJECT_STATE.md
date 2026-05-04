@@ -46,6 +46,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 12. **Rol Bazlı Yönlendirme (`LoginPage.jsx`):** Login sonrası `sks_staff` → `/sks-panel`, `club_owner` → `/club-panel`, diğerleri → `/` olacak şekilde tam rol yönlendirmesi eklendi ✔
 13. **SKS Ayrı Giriş Sayfası (`SKSLoginPage.jsx`):** SKS Personeli kartı `LoginPage.jsx`'ten kaldırıldı. Özel `/sks-login` rotası ve `SKSLoginPage.jsx` oluşturuldu — koyu mavi tasarım, yalnızca email + şifre inputu, başarılı girişte `/sks-panel` yönlendirmesi, rol uyuşmazlığında Türkçe hata mesajı ✔
 14. **PublicRoute Rol Yönlendirmesi (`App.jsx`):** `club_owner` için `/club-panel` yönlendirmesi de eklendi ✔
+15. **SKSLoginPage Yeniden Tasarımı (`SKSLoginPage.jsx`):** Sol panel kaldırıldı, tek sütun ortalanmış kart yapısına geçildi. Arka plan `#ffffff`, primary `#8B0000` (Fırat bordo). Logo, başlık, email input, şifre input, giriş butonu ve alt kısımda `/login` linki — `LoginPage.jsx` ile birebir aynı stil token'ları kullanılıyor ✔
 
 ---
 
@@ -94,4 +95,4 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 ---
 
-*Son güncelleme: 2026-05-04 (SKSLoginPage eklendi)*
+*Son güncelleme: 2026-05-04 (SKSLoginPage yeniden tasarlandı)*
