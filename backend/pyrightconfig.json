@@ -1,0 +1,7 @@
+{
+  "ignore": [
+    "**/__pyrefly_virtual__/**"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none"
+}

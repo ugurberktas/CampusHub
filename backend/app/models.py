@@ -36,6 +36,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     student_no = Column(String(50), nullable=True)
     department = Column(String(255), nullable=True)
+    grade = Column(String(50), nullable=True)
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(50), nullable=False)
     interests = Column(JSON, nullable=True)

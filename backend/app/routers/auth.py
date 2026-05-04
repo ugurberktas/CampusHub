@@ -46,10 +46,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         db.query(University).filter(University.domain == domain).first()
     )
     if university is None:
-        uni_name = domain.removesuffix(".edu.tr")
-        if not uni_name:
-            uni_name = domain
-        university = University(name=uni_name, domain=domain)
+        university = University(name=body.university, domain=domain)
         db.add(university)
         db.flush()
 
@@ -59,6 +56,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         email=normalized_email,
         student_no=local_part,
         department=body.department,
+        grade=body.grade,
         hashed_password=get_password_hash(body.password),
         role="student",
         is_verified=False,

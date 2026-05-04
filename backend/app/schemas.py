@@ -9,7 +9,9 @@ class UserRegister(BaseModel):
     email: EmailStr
     full_name: str
     password: str
-    department: Optional[str] = None
+    university: str
+    department: str
+    grade: str
 
 
 class UserLogin(BaseModel):
@@ -24,6 +26,7 @@ class UserResponse(BaseModel):
     full_name: str
     student_no: Optional[str]
     department: Optional[str]
+    grade: Optional[str]
     role: str
     is_verified: bool
 
