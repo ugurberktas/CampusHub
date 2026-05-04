@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage'
 import SKSLoginPage from './pages/SKSLoginPage'
 import StudentRegisterPage from './pages/StudentRegisterPage'
 import ClubRegisterPage from './pages/ClubRegisterPage'
+import SKSPanel from './pages/SKSPanel'
+import StudentDashboard from './pages/StudentDashboard'
 
 // ─── Loading spinner shared between guards ────────────────────────────────────
 function LoadingScreen() {
@@ -26,6 +28,18 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />
 }
 
+// ─── ProtectedRoute ───────────────────────────────────────────────────────────
+// Checks authentication AND a specific role requirement.
+function ProtectedRoute({ children, role }) {
+  const { user, loading } = useAuth()
+
+  if (loading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  if (role && user.role !== role) return <Navigate to="/" replace />
+
+  return children
+}
+
 // ─── PublicRoute ──────────────────────────────────────────────────────────────
 // Used ONLY on /login, /sks-login, /register, /register-club.
 // Logged-in users are redirected away so they don't land on auth pages.
@@ -39,7 +53,9 @@ function PublicRoute({ children }) {
   if (loading) return <LoadingScreen />
 
   if (user) {
+    if (user.role === 'sks_staff') return <Navigate to="/sks-panel" replace />
     if (user.role === 'club_owner') return <Navigate to="/club-panel" replace />
+    if (user.role === 'student') return <Navigate to="/student-dashboard" replace />
     return <Navigate to="/" replace />
   }
 
@@ -47,10 +63,12 @@ function PublicRoute({ children }) {
 }
 
 // ─── Placeholder pages (to be replaced with real components later) ─────────────
-function PlaceholderPage({ title }) {
+// ─── Placeholder pages (to be replaced with real components later) ─────────────
+function PlaceholderPage({ title, subtitle }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
-      <p style={{ fontWeight: 600, fontSize: '1.5rem', color: 'var(--text-primary)' }}>{title}</p>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
+      <p style={{ fontWeight: 600, fontSize: '1.5rem', color: 'var(--text-primary)', marginBottom: subtitle ? '8px' : '0' }}>{title}</p>
+      {subtitle && <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>{subtitle}</p>}
     </div>
   )
 }
@@ -72,7 +90,9 @@ export default function App() {
           <Route path="/clubs"    element={<PrivateRoute><PlaceholderPage title="Kulüpler" /></PrivateRoute>} />
           <Route path="/events"   element={<PrivateRoute><PlaceholderPage title="Etkinlikler" /></PrivateRoute>} />
           <Route path="/profile"  element={<PrivateRoute><PlaceholderPage title="Profil" /></PrivateRoute>} />
-
+          <Route path="/club-panel" element={<PrivateRoute><PlaceholderPage title="Kulüp Paneli" subtitle="Kulüp paneli yakında aktif edilecek." /></PrivateRoute>} />
+          <Route path="/sks-panel" element={<ProtectedRoute role="sks_staff"><SKSPanel /></ProtectedRoute>} />
+          <Route path="/student-dashboard" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
 
           {/* ── Catch-all ── */}
           <Route path="*" element={<Navigate to="/login" replace />} />

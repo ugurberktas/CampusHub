@@ -31,6 +31,7 @@ export default function LoginPage() {
       const userData = await login(form.email, form.password)
       const role = userData?.role?.trim()
       if (role === 'club_owner') navigate('/club-panel')
+      else if (role === 'student') navigate('/student-dashboard')
       else navigate('/')
     } catch (err) {
       const data = err.response?.data || err;

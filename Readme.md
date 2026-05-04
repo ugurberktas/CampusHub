@@ -6,8 +6,14 @@ A closed-loop SaaS ecosystem for university student communities. Campus Hub conn
 
 - **Backend:** Python + FastAPI
 - **Database:** PostgreSQL (via Docker)
-- **Frontend:** React.js *(coming soon)*
+- **Frontend:** React.js (Vite)
 - **Containerization:** Docker + Docker Compose
+
+## Core Features & Roles
+
+- **Students:** Dashboard with club discovery, event registration, and profile management (**Student Dashboard** Active).
+- **Club Owners:** Manage club applications, events, and attendance via the upcoming **Club Panel**.
+- **SKS Staff:** Oversee all university activities and metrics via the **SKS Panel** (Active).
 
 ## How to Run
 
