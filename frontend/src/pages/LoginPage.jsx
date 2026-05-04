@@ -31,7 +31,8 @@ export default function LoginPage() {
       const userData = await login(form.email, form.password)
       const role = userData?.role?.trim()
       if (role === 'sks_staff') navigate('/sks-panel')
-      else navigate('/login')
+      else if (role === 'club_owner') navigate('/club-panel')
+      else navigate('/')
     } catch (err) {
       const data = err.response?.data || err;
       const detail = data?.detail;

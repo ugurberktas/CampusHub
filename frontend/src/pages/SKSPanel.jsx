@@ -124,7 +124,7 @@ export default function SKSPanel() {
   }, [])
 
   useEffect(() => {
-    if (!user || user.role !== 'sks_staff') return
+    if (loading || !user || user.role !== 'sks_staff') return
     
     // Temizle
     setSearchQuery('')

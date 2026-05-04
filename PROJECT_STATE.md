@@ -42,6 +42,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 8.  **CORS Middleware (`backend/main.py`):** `CORSMiddleware` eklendi — `http://localhost:3000` origin'ine izin verildi ✔
 9.  **Login Bug Fixes (`app/routers/auth.py` & `LoginPage.jsx`):** 422 Validasyon hataları frontend'de düzeltildi ve backend'de `EmailStr` tabanlı 422 fırlatmaları güvenli 401 Unauthorized'a dönüştürüldü ✔
 10. **Global Hata Yönetimi:** Tüm frontend sayfalarında (Register, Clubs, ClubDetail, EventDetail) API hata parsing mantığı, potansiyel obje bazlı yanıtları (string olmayan validation error'ları) güvenle karşılayacak şekilde güncellendi ✔
+11. **Login 422 Hatası Düzeltmesi (`AuthContext.jsx`):** `/auth/login` isteğindeki `username` field'ı `email` olarak düzeltildi — backend şemasıyla uyumlu hale getirildi ✔
+12. **Rol Bazlı Yönlendirme (`LoginPage.jsx`):** Login sonrası `sks_staff` → `/sks-panel`, `club_owner` → `/club-panel`, diğerleri → `/` olacak şekilde tam rol yönlendirmesi eklendi ✔
 
 ---
 
@@ -79,4 +81,4 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 ---
 
-*Son güncelleme: 2026-04-08*
+*Son güncelleme: 2026-05-04*
