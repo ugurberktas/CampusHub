@@ -129,7 +129,7 @@ export default function LoginPage() {
     },
     roleGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
+      gridTemplateColumns: 'repeat(2, 1fr)',
       gap: '12px',
       marginBottom: '32px',
     },
@@ -210,7 +210,6 @@ export default function LoginPage() {
   const roles = [
     { id: 'student', icon: '🎓', label: 'Öğrenci' },
     { id: 'club', icon: '🏛️', label: 'Topluluk' },
-    { id: 'sks', icon: '⚙️', label: 'SKS Personeli' }
   ]
 
   return (

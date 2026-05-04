@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
+import SKSLoginPage from './pages/SKSLoginPage'
 import StudentRegisterPage from './pages/StudentRegisterPage'
 import ClubRegisterPage from './pages/ClubRegisterPage'
 import SKSPanel from './pages/SKSPanel'
@@ -39,7 +40,9 @@ function PublicRoute({ children }) {
   if (loading) return <LoadingScreen />
 
   if (user) {
-    return <Navigate to={user.role === 'sks_staff' ? '/sks-panel' : '/'} replace />
+    if (user.role === 'sks_staff') return <Navigate to="/sks-panel" replace />
+    if (user.role === 'club_owner') return <Navigate to="/club-panel" replace />
+    return <Navigate to="/" replace />
   }
 
   return children
@@ -62,6 +65,7 @@ export default function App() {
         <Routes>
           {/* ── Auth routes (public only) ── */}
           <Route path="/login"         element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path="/sks-login"     element={<PublicRoute><SKSLoginPage /></PublicRoute>} />
           <Route path="/register"      element={<PublicRoute><StudentRegisterPage /></PublicRoute>} />
           <Route path="/register-club" element={<PublicRoute><ClubRegisterPage /></PublicRoute>} />
 

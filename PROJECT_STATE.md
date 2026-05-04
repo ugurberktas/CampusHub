@@ -44,12 +44,22 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 10. **Global Hata Yönetimi:** Tüm frontend sayfalarında (Register, Clubs, ClubDetail, EventDetail) API hata parsing mantığı, potansiyel obje bazlı yanıtları (string olmayan validation error'ları) güvenle karşılayacak şekilde güncellendi ✔
 11. **Login 422 Hatası Düzeltmesi (`AuthContext.jsx`):** `/auth/login` isteğindeki `username` field'ı `email` olarak düzeltildi — backend şemasıyla uyumlu hale getirildi ✔
 12. **Rol Bazlı Yönlendirme (`LoginPage.jsx`):** Login sonrası `sks_staff` → `/sks-panel`, `club_owner` → `/club-panel`, diğerleri → `/` olacak şekilde tam rol yönlendirmesi eklendi ✔
+13. **SKS Ayrı Giriş Sayfası (`SKSLoginPage.jsx`):** SKS Personeli kartı `LoginPage.jsx`'ten kaldırıldı. Özel `/sks-login` rotası ve `SKSLoginPage.jsx` oluşturuldu — koyu mavi tasarım, yalnızca email + şifre inputu, başarılı girişte `/sks-panel` yönlendirmesi, rol uyuşmazlığında Türkçe hata mesajı ✔
+14. **PublicRoute Rol Yönlendirmesi (`App.jsx`):** `club_owner` için `/club-panel` yönlendirmesi de eklendi ✔
 
 ---
 
 ## 🔄 Devam Edenler (In Progress)
 
 *   `feature/auth` branch'i açık, henüz `dev`'e merge edilmedi.
+
+---
+
+## 🐛 Bilinen Hatalar (Known Bugs)
+
+| # | Dosya | Hata | Durum |
+|---|---|---|---|
+| 1 | `AuthContext.jsx` | `/auth/login` payload'ında `username: email` kullanılıyor — backend `email` field bekliyor. Kullanıcı nano ile geri döndürdü, backend şeması net değil. | **Açık / Doğrulama Bekliyor** |
 
 ---
 
@@ -61,6 +71,9 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 - [x] **`feature/events` branch aç** — Etkinlik yönetimi API'si tamamlandı ✔
 - [x] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
 - [x] **`feature/frontend` başlat** — Clubs UI + Events UI modülleri tamamlandı (`feature/kulup-arayuzu`) ✔
+- [x] **SKS ayrı giriş sayfası** — `SKSLoginPage.jsx` + `/sks-login` rotası ✔
+- [ ] **`AuthContext.jsx` login payload'ı doğrula** — `email` mi `username` mı? Backend `auth.py` şeması kontrol edilmeli
+- [ ] **ClubPanel.jsx** — `club_owner` rolü için panel sayfası (`/club-panel`)
 - [ ] **EventsPage.jsx** — Tüm etkinlikleri listeleyen sayfa (`GET /events`)
 - [ ] **ProfilePage.jsx** — Kullanıcı profil sayfası
 - [ ] **QR katılım sistemi** — Etkinlik QR tarama akışı
@@ -81,4 +94,4 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 ---
 
-*Son güncelleme: 2026-05-04*
+*Son güncelleme: 2026-05-04 (SKSLoginPage eklendi)*
