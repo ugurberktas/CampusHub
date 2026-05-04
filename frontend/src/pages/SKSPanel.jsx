@@ -9,7 +9,7 @@ export default function SKSPanel() {
   
   const [activeTab, setActiveTab] = useState('home')
   
-  const [stats, setStats] = useState({ pendingCount: 0, approvedCount: 0, eventCount: 0 })
+  const [stats, setStats] = useState({ pendingCount: 0, approvedCount: 0, eventCount: 0, userCount: '--' })
   const [pendingClubs, setPendingClubs] = useState([])
   const [approvedClubs, setApprovedClubs] = useState([])
   const [users, setUsers] = useState([])
@@ -38,24 +38,29 @@ export default function SKSPanel() {
 
   const fetchDashboardStats = useCallback(async () => {
     try {
-      const [pendingRes, approvedRes, eventsRes] = await Promise.all([
+      const [pendingRes, approvedRes, eventsRes, sksStatsRes] = await Promise.all([
         api.get('/clubs/pending'),
-        api.get('/clubs?status=active').catch(() => api.get('/clubs')), // Fallback if query unsupported
-        api.get('/events')
+        api.get('/clubs?status=active').catch(() => api.get('/clubs')),
+        api.get('/events'),
+        api.get('/sks/stats').catch(() => null)
       ])
       
       let approvedCount = 0
       if (approvedRes.data && Array.isArray(approvedRes.data)) {
         approvedCount = approvedRes.data.filter(c => c.status === 'active').length
       }
+
+      const userCount = sksStatsRes?.data?.total_users ?? 'Hata'
       
       setStats({
         pendingCount: pendingRes.data?.length || 0,
         approvedCount: approvedCount,
-        eventCount: eventsRes.data?.length || 0
+        eventCount: eventsRes.data?.length || 0,
+        userCount,
       })
     } catch (err) {
       console.error('Error fetching stats:', err)
+      setStats(prev => ({ ...prev, userCount: 'Hata' }))
     }
   }, [])
 
@@ -522,7 +527,7 @@ export default function SKSPanel() {
               <div style={s.statLabel}>Toplam Etkinlik</div>
             </div>
             <div style={s.statCard}>
-              <div style={s.statNumber}>--</div>
+              <div style={s.statNumber}>{stats.userCount}</div>
               <div style={s.statLabel}>Toplam Kullanıcı</div>
             </div>
           </div>

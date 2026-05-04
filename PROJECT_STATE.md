@@ -47,6 +47,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 13. **SKS Ayrı Giriş Sayfası (`SKSLoginPage.jsx`):** SKS Personeli kartı `LoginPage.jsx`'ten kaldırıldı. Özel `/sks-login` rotası ve `SKSLoginPage.jsx` oluşturuldu — koyu mavi tasarım, yalnızca email + şifre inputu, başarılı girişte `/sks-panel` yönlendirmesi, rol uyuşmazlığında Türkçe hata mesajı ✔
 14. **PublicRoute Rol Yönlendirmesi (`App.jsx`):** `club_owner` için `/club-panel` yönlendirmesi de eklendi ✔
 15. **SKSLoginPage Yeniden Tasarımı (`SKSLoginPage.jsx`):** Sol panel kaldırıldı, tek sütun ortalanmış kart yapısına geçildi. Arka plan `#ffffff`, primary `#8B0000` (Fırat bordo). Logo, başlık, email input, şifre input, giriş butonu ve alt kısımda `/login` linki — `LoginPage.jsx` ile birebir aynı stil token'ları kullanılıyor ✔
+16. **`GET /sks/stats` Endpoint (`backend/app/routers/sks.py`):** Yeni `sks.py` router oluşturuldu. `GET /sks/stats` — yalnızca `sks_staff` JWT ile erişilebilir; `total_users`, `total_clubs`, `total_events` döndürür. `main.py`'e `/sks` prefix'iyle kaydedildi ✔
+17. **SKSPanel Toplam Kullanıcı Kartı (`SKSPanel.jsx`):** `--` sabit değeri kaldırıldı. `fetchDashboardStats` içine `GET /sks/stats` eklendi; kart artık gerçek `total_users` sayısını gösteriyor. Yüklenirken `--`, hata durumunda `Hata` yazıyor ✔
 
 ---
 
@@ -60,7 +62,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 | # | Dosya | Hata | Durum |
 |---|---|---|---|
-| 1 | `AuthContext.jsx` | `/auth/login` payload'ında `username: email` kullanılıyor — backend `email` field bekliyor. Kullanıcı nano ile geri döndürdü, backend şeması net değil. | **Açık / Doğrulama Bekliyor** |
+| 1 | `AuthContext.jsx` | `/auth/login` payload’ında `username: email` kullanılıyor — backend `LoginRequest` modeli de `username` alanı bekliyor, bu nedenle **doğru** — değiştirme! | **Kapatıldı / Yanlış bug tespiti** |
 
 ---
 
@@ -73,7 +75,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 - [x] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
 - [x] **`feature/frontend` başlat** — Clubs UI + Events UI modülleri tamamlandı (`feature/kulup-arayuzu`) ✔
 - [x] **SKS ayrı giriş sayfası** — `SKSLoginPage.jsx` + `/sks-login` rotası ✔
-- [ ] **`AuthContext.jsx` login payload'ı doğrula** — `email` mi `username` mı? Backend `auth.py` şeması kontrol edilmeli
+- [x] **`GET /sks/stats` endpoint** — `backend/app/routers/sks.py` oluşturuldu, `main.py`'e eklendi ✔
+- [x] **SKSPanel Toplam Kullanıcı kartı** — `--` yerine gerçek `total_users` gösteriliyor ✔
 - [ ] **ClubPanel.jsx** — `club_owner` rolü için panel sayfası (`/club-panel`)
 - [ ] **EventsPage.jsx** — Tüm etkinlikleri listeleyen sayfa (`GET /events`)
 - [ ] **ProfilePage.jsx** — Kullanıcı profil sayfası
@@ -95,4 +98,4 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 
 ---
 
-*Son güncelleme: 2026-05-04 (SKSLoginPage yeniden tasarlandı)*
+*Son güncelleme: 2026-05-04 (GET /sks/stats eklendi, SKSPanel Toplam Kullanıcı kartı düzeldi)*

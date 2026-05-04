@@ -7,6 +7,7 @@ from app.models import *
 from app.routers.auth import router as auth_router
 from app.routers.clubs import router as clubs_router
 from app.routers.events import router as events_router
+from app.routers.sks import router as sks_router
 
 app = FastAPI(title="Campus Hub API", version="0.1.0")
 
@@ -21,6 +22,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth")
 app.include_router(clubs_router, prefix="/clubs")
 app.include_router(events_router, prefix="/events")
+app.include_router(sks_router)
 
 @app.on_event("startup")
 def startup():
