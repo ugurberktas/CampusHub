@@ -12,7 +12,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 *   **Veritabanı (Database):** PostgreSQL 15 (Docker üzerinden)
 *   **Veritabanı Yönetimi:** pgAdmin4
 *   **Konteynerleştirme:** Docker & Docker Compose
-*   **Frontend:** React.js + Vite (localhost:3000) — Auth, Kulüpler ve Etkinlik Detay sayfaları tamamlandı
+*   **Frontend:** React.js + Vite (localhost:3000) — Auth ve SKS Panel sayfaları mevcut (Frontend sıfırdan yeniden yapılandırılıyor, eski arayüzler temizlendi)
 
 ---
 
@@ -31,17 +31,14 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
     *   `DELETE /events/{event_id}` — Etkinliği sil (club owner/core_team)
     *   `POST /events/{event_id}/register` — Kayıt ol (kapasite & mükerrer kontrolü + erken uyarı)
     *   `GET /events/{event_id}/registrations` — Kayıtlı kullanıcıları listele (club staff)
-7.  **Frontend (`feature/kulup-arayuzu`):** React + Vite kurulumu tamamlandı:
-    *   `LoginPage.jsx`, `RegisterPage.jsx`, `HomePage.jsx` — Auth akışı ✔
-    *   `ClubsPage.jsx`, `ClubCard.jsx` — Kulüp listesi (arama + kategori filtresi) ✔
-    *   `ClubDetailPage.jsx` — Kulüp detay + Takip Et butonu ✔
-    *   `EventDetailPage.jsx` — Etkinlik detay + Kayıt Ol butonu ✔
+7.  **Frontend (`feature/frontend-yeniden`):** React + Vite ile yeniden başlatıldı:
+    *   `LoginPage.jsx`, `StudentRegisterPage.jsx`, `ClubRegisterPage.jsx`, `SKSLoginPage.jsx`, `SKSPanel.jsx` — Auth ve SKS Panel sayfaları mevcut ✔
     *   `src/api/axios.js` — JWT interceptor ✔
     *   `src/context/AuthContext.jsx` — Global auth state ✔
-    *   `src/App.jsx` — Route: `/`, `/clubs`, `/clubs/:id`, `/events/:id` ✔
+    *   `src/App.jsx` — Protected/Public route'lar ayarlandı. `/`, `/clubs`, `/events` ve `/profile` şu an `PlaceholderPage` ile geçici olarak tutuluyor ✔
 8.  **CORS Middleware (`backend/main.py`):** `CORSMiddleware` eklendi — `http://localhost:3000` origin'ine izin verildi ✔
 9.  **Login Bug Fixes (`app/routers/auth.py` & `LoginPage.jsx`):** 422 Validasyon hataları frontend'de düzeltildi ve backend'de `EmailStr` tabanlı 422 fırlatmaları güvenli 401 Unauthorized'a dönüştürüldü ✔
-10. **Global Hata Yönetimi:** Tüm frontend sayfalarında (Register, Clubs, ClubDetail, EventDetail) API hata parsing mantığı, potansiyel obje bazlı yanıtları (string olmayan validation error'ları) güvenle karşılayacak şekilde güncellendi ✔
+10. **Global Hata Yönetimi:** Tüm frontend auth sayfalarında API hata parsing mantığı güncellendi ✔
 11. **Login 422 Hatası Düzeltmesi (`AuthContext.jsx`):** `/auth/login` isteğindeki `username` field'ı `email` olarak düzeltildi — backend şemasıyla uyumlu hale getirildi ✔
 12. **Rol Bazlı Yönlendirme (`LoginPage.jsx`):** Login sonrası `club_owner` → `/club-panel`, diğerleri → `/` — `sks_staff` için `/sks-panel` yönlendirmesi kaldırıldı ✔
 13. **SKS Ayrı Giriş Sayfası (`SKSLoginPage.jsx`):** SKS Personeli kartı `LoginPage.jsx`'ten kaldırıldı. Özel `/sks-login` rotası ve `SKSLoginPage.jsx` oluşturuldu — yalnızca email + şifre inputu, rol uyuşmazlığında Türkçe hata mesajı ✔ (`/sks-panel` yönlendirmesi devre dışı)
@@ -73,12 +70,14 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 - [x] **`feature/clubs` branch aç** — Kulüp yönetimi API'si tamamlandı ✔
 - [x] **`feature/events` branch aç** — Etkinlik yönetimi API'si tamamlandı ✔
 - [x] **`feature/qr` branch aç** — Etkinlik QR kod katılım sistemi (Attendance + Certificate)
-- [x] **`feature/frontend` başlat** — Clubs UI + Events UI modülleri tamamlandı (`feature/kulup-arayuzu`) ✔
+- [ ] **`feature/frontend-yeniden` başlat** — Arayüz sıfırdan yeniden yazılıyor
 - [x] **SKS ayrı giriş sayfası** — `SKSLoginPage.jsx` + `/sks-login` rotası ✔
 - [x] **`GET /sks/stats` endpoint** — `backend/app/routers/sks.py` oluşturuldu, `main.py`'e eklendi ✔
 - [x] **SKSPanel Toplam Kullanıcı kartı** — `--` yerine gerçek `total_users` gösteriliyor ✔
+- [ ] **HomePage.jsx** — Ana sayfa tasarımı
+- [ ] **ClubsPage.jsx & ClubDetailPage.jsx** — Kulüp listesi ve detay sayfası
+- [ ] **EventsPage.jsx & EventDetailPage.jsx** — Tüm etkinlikleri listeleyen sayfa ve detay sayfası
 - [ ] **ClubPanel.jsx** — `club_owner` rolü için panel sayfası (`/club-panel`)
-- [ ] **EventsPage.jsx** — Tüm etkinlikleri listeleyen sayfa (`GET /events`)
 - [ ] **ProfilePage.jsx** — Kullanıcı profil sayfası
 - [ ] **QR katılım sistemi** — Etkinlik QR tarama akışı
 
@@ -94,8 +93,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 | `feature/auth` | Merged | `dev`'e merge edildi ✔ |
 | `feature/clubs` | Merged | `dev`'e merge edildi ✔ |
 | `feature/events` | In Progress | Devam ediyor, merge bekliyor |
-| `feature/kulup-arayuzu` | In Progress | Frontend: Clubs UI + Events UI tamamlandı |
+| `feature/frontend-yeniden` | In Progress | Frontend baştan yazılıyor, eski sayfalar silindi |
 
 ---
 
-*Son güncelleme: 2026-05-04 (GET /sks/stats eklendi, SKSPanel Toplam Kullanıcı kartı düzeldi)*
+*Son güncelleme: 2026-05-06 (Frontend yeniden yapılandırma için temizlendi, feature/frontend-yeniden branch'ine geçildi)*
