@@ -46,6 +46,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 15. **SKSLoginPage Yeniden Tasarımı (`SKSLoginPage.jsx`):** Sol panel kaldırıldı, tek sütun ortalanmış kart yapısına geçildi. Arka plan `#ffffff`, primary `#8B0000` (Fırat bordo). Logo, başlık, email input, şifre input, giriş butonu ve alt kısımda `/login` linki — `LoginPage.jsx` ile birebir aynı stil token'ları kullanılıyor ✔
 16. **`GET /sks/stats` Endpoint (`backend/app/routers/sks.py`):** Yeni `sks.py` router oluşturuldu. `GET /sks/stats` — yalnızca `sks_staff` JWT ile erişilebilir; `total_users`, `total_clubs`, `total_events` döndürür. `main.py`'e `/sks` prefix'iyle kaydedildi ✔
 17. **SKSPanel Toplam Kullanıcı Kartı (`SKSPanel.jsx`):** `--` sabit değeri kaldırıldı. `fetchDashboardStats` içine `GET /sks/stats` eklendi; kart artık gerçek `total_users` sayısını gösteriyor. Yüklenirken `--`, hata durumunda `Hata` yazıyor ✔
+18. **Giriş Sayfaları (Placeholders):** `OgrenciGiris.jsx`, `ToplulukGiris.jsx` ve `SksGiris.jsx` sayfaları geçici (placeholder) olarak oluşturuldu ✔
+19. **React Temel Altyapı ve Routing:** `index.css` (Tailwind), `axios.js`, `AuthContext.jsx`, `main.jsx` ve `App.jsx` (React Router v7) dosyaları başarıyla oluşturuldu ve birbirine bağlandı ✔
 
 ---
 
