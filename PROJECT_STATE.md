@@ -74,7 +74,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 - [x] **SKS ayrı giriş sayfası** — `SKSLoginPage.jsx` + `/sks-login` rotası ✔
 - [x] **`GET /sks/stats` endpoint** — `backend/app/routers/sks.py` oluşturuldu, `main.py`'e eklendi ✔
 - [x] **SKSPanel Toplam Kullanıcı kartı** — `--` yerine gerçek `total_users` gösteriliyor ✔
-- [ ] **HomePage.jsx** — Ana sayfa tasarımı
+- [x] **HomePage.jsx** — Ana sayfa tasarımı (LandingPage.jsx olarak tamamlandı) ✔
 - [ ] **ClubsPage.jsx & ClubDetailPage.jsx** — Kulüp listesi ve detay sayfası
 - [ ] **EventsPage.jsx & EventDetailPage.jsx** — Tüm etkinlikleri listeleyen sayfa ve detay sayfası
 - [ ] **ClubPanel.jsx** — `club_owner` rolü için panel sayfası (`/club-panel`)
