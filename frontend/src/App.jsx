@@ -6,7 +6,7 @@ import LandingPage from './pages/LandingPage';
 import OgrenciGiris from './pages/OgrenciGiris';
 import ToplulukGiris from './pages/ToplulukGiris';
 import SksGiris from './pages/SksGiris';
-
+import OgrenciKayit from './pages/OgrenciKayit';
 const getDashboardRoute = (role) => {
   switch (role) {
     case 'student': return '/student-dashboard';
@@ -68,7 +68,7 @@ function App() {
         
         <Route path="/ogrenci-kayit" element={
           <PublicOnlyRoute>
-            <div>Öğrenci Kayıt - Yakında</div>
+            <OgrenciKayit />
           </PublicOnlyRoute>
         } />
         

@@ -55,6 +55,9 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 24. **Topluluk Giriş Sayfası (`ToplulukGiris.jsx`):** Öğrenci giriş sayfasıyla aynı split-screen mimarisine oturtuldu. `useAuth` login sistemi üzerinden role dayalı doğrulama ve yalnızca topluluk sahiplerine (`club_owner`) özel giriş mantığı entegre edildi ✔
 25. **Hata Yakalama (AuthContext):** `login` fonksiyonu içerisinde eksik olan `try/catch` bloğu eklendi. Backend'den dönen HTTP hatalarının yutulması önlenerek çağıran sayfaya (caller) fırlatılması sağlandı ✔
 26. **SKS Giriş Sayfası (`SksGiris.jsx`):** Diğer giriş sayfalarıyla aynı split-screen tasarımına geçirildi. `useAuth` login ile yalnızca `sks_staff` yetkisine izin verildi, yetkisiz rollere özel hata eklendi ve SKS personeline özel olduğu için "Kayıt Ol" bağlantısı tamamen kaldırıldı ✔
+27. **Öğrenci Kayıt Sayfası (`OgrenciKayit.jsx`):** Split-screen tasarım yapısına uygun şekilde form elemanları (Ad, E-posta, Bölüm, Sınıf, Şifre) entegre edilerek `OgrenciKayit.jsx` oluşturuldu. İstemci tarafı validasyonlar (örn. `.edu.tr` uzantısı zorunluluğu) ve `api.post('/auth/register')` bağlantısı kurularak kayıt sonrası otomatik `/ogrenci-girisi` yönlendirmesi eklendi ✔
+28. **Öğrenci Kayıt Entegrasyonu (`App.jsx`):** `/ogrenci-kayit` rotası içerisindeki placeholder bileşen kaldırılarak, yeni oluşturulan `OgrenciKayit` sayfası Router'a entegre edildi ✔
+29. **Öğrenci Kayıt Formu İyileştirmeleri:** `OgrenciKayit.jsx` içerisindeki Sınıf seçeneği güncellendi; "Hazırlık", "5. Sınıf" ve "6. Sınıf" seçenekleri eklendi ve seçicinin genişliği (w-full) diğer inputlarla uyumlu hale getirildi ✔
 
 ---
 
