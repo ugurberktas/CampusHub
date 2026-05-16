@@ -54,7 +54,8 @@ export default function ToplulukKayit() {
           password: password,
           university: 'firat',
           department: 'Kulüp Başkanı',
-          grade: '0'
+          grade: '0',
+          role: 'club_owner'
         }
       )
       const token = registerRes.data.access_token || registerRes.data.token
