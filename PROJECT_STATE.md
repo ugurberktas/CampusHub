@@ -60,6 +60,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 29. **Öğrenci Kayıt Formu İyileştirmeleri:** `OgrenciKayit.jsx` içerisindeki Sınıf seçeneği güncellendi; "Hazırlık", "5. Sınıf" ve "6. Sınıf" seçenekleri eklendi ve seçicinin genişliği (w-full) diğer inputlarla uyumlu hale getirildi ✔
 30. **Topluluk Kayıt Sayfası Arayüzü (`ToplulukKayit.jsx`):** 2 aşamalı (Hesap Bilgileri ve Kulüp Bilgileri) kayıt sürecinin görsel arayüzü kodlandı. Adım göstergeleri ve ilk aşama form validasyonları eklendi (API entegrasyonu henüz yapılmadı) ✔
 31. **Topluluk Kayıt Entegrasyonu (`App.jsx`):** `/topluluk-kayit` rotası içerisindeki placeholder bileşen kaldırılarak, yeni oluşturulan `ToplulukKayit` sayfası Router'a entegre edildi ✔
+32. **Topluluk Kayıt API Mantığı (`ToplulukKayit.jsx`):** Boş bırakılan `handleSubmit` fonksiyonu dolduruldu. Sırasıyla: kullanıcı kaydı (`/auth/register`), dönen token ile kulüp oluşturma (`/clubs`) yapılıyor; başarıda 3 saniye sonra `/topluluk-girisi`ne yönlendiriliyor, hatalarda backend mesajı form üzerinde gösteriliyor ✔
 
 ---
 

@@ -37,7 +37,62 @@ export default function ToplulukKayit() {
     setStep(2);
   };
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    if (!clubName || !advisorName || !advisorFaculty || !advisorEmail) {
+      setError('Lütfen zorunlu alanları doldurunuz.')
+      return
+    }
+    setError(null)
+    setLoading(true)
+    try {
+      // STEP 1: Register user
+      const registerRes = await api.post(
+        '/auth/register',
+        {
+          email: email,
+          full_name: fullName,
+          password: password,
+          university: 'firat',
+          department: 'Kulüp Başkanı',
+          grade: '0'
+        }
+      )
+      const token = registerRes.data.access_token || registerRes.data.token
+
+      // STEP 2: Create club with token
+      await api.post(
+        '/clubs',
+        {
+          name: clubName,
+          description: description,
+          category: category,
+          advisor_name: advisorName,
+          advisor_faculty: advisorFaculty,
+          advisor_email: advisorEmail
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      setSuccess(true)
+      setLoading(false)
+      setTimeout(() => {
+        navigate('/topluluk-girisi')
+      }, 3000)
+    } catch (err) {
+      setLoading(false)
+      const detail = err.response?.data?.detail
+      if (typeof detail === 'string') {
+        setError(detail)
+      } else if (Array.isArray(detail)) {
+        setError(detail[0]?.msg || 'Kayıt sırasında bir hata oluştu.')
+      } else {
+        setError('Kayıt sırasında bir hata oluştu.')
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen flex font-sans">
