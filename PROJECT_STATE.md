@@ -62,6 +62,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 31. **Topluluk Kayıt Entegrasyonu (`App.jsx`):** `/topluluk-kayit` rotası içerisindeki placeholder bileşen kaldırılarak, yeni oluşturulan `ToplulukKayit` sayfası Router'a entegre edildi ✔
 32. **Topluluk Kayıt API Mantığı (`ToplulukKayit.jsx`):** Boş bırakılan `handleSubmit` fonksiyonu dolduruldu. Sırasıyla: kullanıcı kaydı (`/auth/register`), dönen token ile kulüp oluşturma (`/clubs`) yapılıyor; başarıda 3 saniye sonra `/topluluk-girisi`ne yönlendiriliyor, hatalarda backend mesajı form üzerinde gösteriliyor ✔
 33. **Topluluk Kayıt Rol Alanı (`ToplulukKayit.jsx`):** `handleSubmit` içerisindeki `/auth/register` istek gövdesine `role: 'club_owner'` alanı eklendi — kulüp başkanları artık kayıt sırasında doğru rolle oluşturuluyor ✔
+34. **AuthContext Login Düzeltmesi (`AuthContext.jsx`):** Login fonksiyonu güncellendi. Token alındıktan sonra `GET /auth/me` çağrısıyla gerçek kullanıcı objesi (id, email, role vb.) alınıp localStorage ve state'e kaydediliyor — artık token response objesi değil, gerçek kullanıcı bilgisi saklanıyor ✔
 
 ---
 

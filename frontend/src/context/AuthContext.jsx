@@ -27,25 +27,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // CRITICAL: send as { username: email, password }
       const response = await api.post('/auth/login', {
         username: email,
         password: password
-      });
+      })
+      const fetchedToken = response.data.access_token
 
-      const data = response.data;
-      const fetchedToken = data.access_token || data.token;
-      const fetchedUser = data.user || data;
+      const userResponse = await api.get('/auth/me', {
+        headers: { Authorization: `Bearer ${fetchedToken}` }
+      })
+      const fetchedUser = userResponse.data
 
-      localStorage.setItem('token', fetchedToken);
-      localStorage.setItem('user', JSON.stringify(fetchedUser));
-
-      setToken(fetchedToken);
-      setUser(fetchedUser);
-
-      return fetchedUser;
+      localStorage.setItem('token', fetchedToken)
+      localStorage.setItem('user', JSON.stringify(fetchedUser))
+      setToken(fetchedToken)
+      setUser(fetchedUser)
+      return fetchedUser
     } catch (error) {
-      throw error;
+      throw error
     }
   };
 
