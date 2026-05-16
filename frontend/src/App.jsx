@@ -7,6 +7,8 @@ import OgrenciGiris from './pages/OgrenciGiris';
 import ToplulukGiris from './pages/ToplulukGiris';
 import SksGiris from './pages/SksGiris';
 import OgrenciKayit from './pages/OgrenciKayit';
+import ToplulukKayit from './pages/ToplulukKayit';
+
 const getDashboardRoute = (role) => {
   switch (role) {
     case 'student': return '/student-dashboard';
@@ -74,7 +76,7 @@ function App() {
         
         <Route path="/topluluk-kayit" element={
           <PublicOnlyRoute>
-            <div>Topluluk Kayıt - Yakında</div>
+            <ToplulukKayit />
           </PublicOnlyRoute>
         } />
         

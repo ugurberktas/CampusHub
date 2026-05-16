@@ -58,6 +58,8 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 27. **Öğrenci Kayıt Sayfası (`OgrenciKayit.jsx`):** Split-screen tasarım yapısına uygun şekilde form elemanları (Ad, E-posta, Bölüm, Sınıf, Şifre) entegre edilerek `OgrenciKayit.jsx` oluşturuldu. İstemci tarafı validasyonlar (örn. `.edu.tr` uzantısı zorunluluğu) ve `api.post('/auth/register')` bağlantısı kurularak kayıt sonrası otomatik `/ogrenci-girisi` yönlendirmesi eklendi ✔
 28. **Öğrenci Kayıt Entegrasyonu (`App.jsx`):** `/ogrenci-kayit` rotası içerisindeki placeholder bileşen kaldırılarak, yeni oluşturulan `OgrenciKayit` sayfası Router'a entegre edildi ✔
 29. **Öğrenci Kayıt Formu İyileştirmeleri:** `OgrenciKayit.jsx` içerisindeki Sınıf seçeneği güncellendi; "Hazırlık", "5. Sınıf" ve "6. Sınıf" seçenekleri eklendi ve seçicinin genişliği (w-full) diğer inputlarla uyumlu hale getirildi ✔
+30. **Topluluk Kayıt Sayfası Arayüzü (`ToplulukKayit.jsx`):** 2 aşamalı (Hesap Bilgileri ve Kulüp Bilgileri) kayıt sürecinin görsel arayüzü kodlandı. Adım göstergeleri ve ilk aşama form validasyonları eklendi (API entegrasyonu henüz yapılmadı) ✔
+31. **Topluluk Kayıt Entegrasyonu (`App.jsx`):** `/topluluk-kayit` rotası içerisindeki placeholder bileşen kaldırılarak, yeni oluşturulan `ToplulukKayit` sayfası Router'a entegre edildi ✔
 
 ---
 
