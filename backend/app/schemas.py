@@ -12,6 +12,7 @@ class UserRegister(BaseModel):
     university: str
     department: str
     grade: str
+    role: Optional[str] = "student"
 
 
 class UserLogin(BaseModel):

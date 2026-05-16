@@ -26,7 +26,7 @@ def _parse_email_parts(email: str) -> tuple[str, str]:
     return parts[0], parts[1]
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=Token)
 def register(body: UserRegister, db: Session = Depends(get_db)):
     local_part, domain = _parse_email_parts(str(body.email))
     if not domain.endswith(".edu.tr"):
@@ -58,13 +58,14 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         department=body.department,
         grade=body.grade,
         hashed_password=get_password_hash(body.password),
-        role="student",
+        role=body.role or "student",
         is_verified=False,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    return user
+    access_token = create_access_token(data={"sub": user.email})
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @router.post("/login", response_model=Token)

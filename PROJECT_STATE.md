@@ -49,6 +49,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 18. **Tailwind CSS Entegrasyonu:** React + Vite projesine Tailwind CSS v3, postcss ve autoprefixer eklendi, `tailwind.config.js` ayarlandı ve `src/index.css` içerisine Tailwind direktifleri eklendi ✔
 19. **Axios & AuthContext Yapılandırması:** `src/api/axios.js` oluşturularak JWT yetkilendirme ve hata yönetimi (interceptor) sağlandı. `src/context/AuthContext.jsx` oluşturularak login/logout ve global state yönetimi kuruldu ✔
 20. **Ana Giriş Noktası & Yönlendirme (Routing):** `src/main.jsx` içerisinde uygulama `AuthProvider` ile sarmalandı. `src/App.jsx` içerisinde React Router DOM v7 kullanılarak `PrivateRoute` ve `PublicOnlyRoute` bileşenleri oluşturuldu; rol tabanlı yetkilendirme (student, club_owner, sks_staff) rotaları tanımlandı ✔
+21. **Backend Register Endpoint Güncelleme (`schemas.py` + `auth.py`):** `UserRegister` şemasına `role: Optional[str] = "student"` eklendi. `/auth/register` endpoint'i artık `body.role` kullanıyor ve kayıt sonrası `UserResponse` yerine JWT `Token` döndürüyor — `ToplulukKayit.jsx` 2 adımlı kayıt akışıyla tam uyumlu ✔
 
 ---
 
