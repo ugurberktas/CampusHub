@@ -54,6 +54,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 23. **Kayıt Rotaları (`App.jsx`):** `/ogrenci-kayit` ve `/topluluk-kayit` (PublicOnlyRoute) rotaları `App.jsx` içerisine geçici (placeholder) componentler ile eklendi ✔
 24. **Topluluk Giriş Sayfası (`ToplulukGiris.jsx`):** Öğrenci giriş sayfasıyla aynı split-screen mimarisine oturtuldu. `useAuth` login sistemi üzerinden role dayalı doğrulama ve yalnızca topluluk sahiplerine (`club_owner`) özel giriş mantığı entegre edildi ✔
 25. **Hata Yakalama (AuthContext):** `login` fonksiyonu içerisinde eksik olan `try/catch` bloğu eklendi. Backend'den dönen HTTP hatalarının yutulması önlenerek çağıran sayfaya (caller) fırlatılması sağlandı ✔
+26. **SKS Giriş Sayfası (`SksGiris.jsx`):** Diğer giriş sayfalarıyla aynı split-screen tasarımına geçirildi. `useAuth` login ile yalnızca `sks_staff` yetkisine izin verildi, yetkisiz rollere özel hata eklendi ve SKS personeline özel olduğu için "Kayıt Ol" bağlantısı tamamen kaldırıldı ✔
 
 ---
 
