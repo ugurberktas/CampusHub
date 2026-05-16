@@ -48,6 +48,12 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 17. **SKSPanel Toplam Kullanıcı Kartı (`SKSPanel.jsx`):** `--` sabit değeri kaldırıldı. `fetchDashboardStats` içine `GET /sks/stats` eklendi; kart artık gerçek `total_users` sayısını gösteriyor. Yüklenirken `--`, hata durumunda `Hata` yazıyor ✔
 18. **Giriş Sayfaları (Placeholders):** `OgrenciGiris.jsx`, `ToplulukGiris.jsx` ve `SksGiris.jsx` sayfaları geçici (placeholder) olarak oluşturuldu ✔
 19. **React Temel Altyapı ve Routing:** `index.css` (Tailwind), `axios.js`, `AuthContext.jsx`, `main.jsx` ve `App.jsx` (React Router v7) dosyaları başarıyla oluşturuldu ve birbirine bağlandı ✔
+20. **LandingPage Yönlendirmeleri:** Navbar linkleri (`Öğrenciler`, `Topluluklar`) işlevsel hale getirildi. Hero bölümünün altına Öğrenci ve Topluluk girişleri için interaktif iki adet kart eklendi ✔
+21. **Öğrenci Giriş Sayfası (`OgrenciGiris.jsx`):** Split-screen (ikiye bölünmüş) tasarım uygulandı. Sol tarafa marka alanı, sağ tarafa ise `useAuth` tabanlı, rol kontrollü (öğrenci harici rollere özel hata mesajı) giriş formu entegre edildi ✔
+22. **Hata Yakalama (Axios):** `axios.js` içerisindeki 401 response interceptor güncellendi. Başarısız login istekleri (`/auth/login`) anında logout tetiklemek yerine reject edilerek login formuna iletilecek hale getirildi ✔
+23. **Kayıt Rotaları (`App.jsx`):** `/ogrenci-kayit` ve `/topluluk-kayit` (PublicOnlyRoute) rotaları `App.jsx` içerisine geçici (placeholder) componentler ile eklendi ✔
+24. **Topluluk Giriş Sayfası (`ToplulukGiris.jsx`):** Öğrenci giriş sayfasıyla aynı split-screen mimarisine oturtuldu. `useAuth` login sistemi üzerinden role dayalı doğrulama ve yalnızca topluluk sahiplerine (`club_owner`) özel giriş mantığı entegre edildi ✔
+25. **Hata Yakalama (AuthContext):** `login` fonksiyonu içerisinde eksik olan `try/catch` bloğu eklendi. Backend'den dönen HTTP hatalarının yutulması önlenerek çağıran sayfaya (caller) fırlatılması sağlandı ✔
 
 ---
 

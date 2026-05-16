@@ -66,6 +66,18 @@ function App() {
           </PublicOnlyRoute>
         } />
         
+        <Route path="/ogrenci-kayit" element={
+          <PublicOnlyRoute>
+            <div>Öğrenci Kayıt - Yakında</div>
+          </PublicOnlyRoute>
+        } />
+        
+        <Route path="/topluluk-kayit" element={
+          <PublicOnlyRoute>
+            <div>Topluluk Kayıt - Yakında</div>
+          </PublicOnlyRoute>
+        } />
+        
         <Route path="/student-dashboard" element={
           <PrivateRoute allowedRole="student">
             <div>Öğrenci Paneli - Yakında</div>

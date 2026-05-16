@@ -26,23 +26,27 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // CRITICAL: send as { username: email, password }
-    const response = await api.post('/auth/login', {
-      username: email,
-      password: password
-    });
+    try {
+      // CRITICAL: send as { username: email, password }
+      const response = await api.post('/auth/login', {
+        username: email,
+        password: password
+      });
 
-    const data = response.data;
-    const fetchedToken = data.access_token || data.token;
-    const fetchedUser = data.user || data;
+      const data = response.data;
+      const fetchedToken = data.access_token || data.token;
+      const fetchedUser = data.user || data;
 
-    localStorage.setItem('token', fetchedToken);
-    localStorage.setItem('user', JSON.stringify(fetchedUser));
+      localStorage.setItem('token', fetchedToken);
+      localStorage.setItem('user', JSON.stringify(fetchedUser));
 
-    setToken(fetchedToken);
-    setUser(fetchedUser);
+      setToken(fetchedToken);
+      setUser(fetchedUser);
 
-    return fetchedUser;
+      return fetchedUser;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const logout = () => {
