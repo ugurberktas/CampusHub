@@ -6,6 +6,7 @@ export default function SksPanel() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
+  const [pendingClubs, setPendingClubs] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -18,7 +19,18 @@ export default function SksPanel() {
       }
     };
 
+    const fetchPendingClubs = async () => {
+      try {
+        const response = await api.get('/clubs/pending');
+        setPendingClubs(response.data);
+      } catch (err) {
+        console.error('Onay bekleyen kulüpler yüklenirken hata oluştu:', err);
+        setPendingClubs([]);
+      }
+    };
+
     fetchStats();
+    fetchPendingClubs();
   }, []);
 
   const menuItems = [
@@ -81,8 +93,80 @@ export default function SksPanel() {
         );
       case 'pending':
         return (
-          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-            Onay Bekleyenler — gelecek
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-6">
+              Onay Bekleyen Topluluklar
+            </h2>
+
+            {pendingClubs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <span className="text-5xl select-none">⏳</span>
+                <p className="text-gray-400 text-sm">Onay bekleyen topluluk yok</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {pendingClubs.map((club) => (
+                  <div
+                    key={club.id}
+                    className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between shadow-sm"
+                  >
+                    {/* LEFT SIDE */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#800000]/10 text-[#800000] font-bold text-sm flex items-center justify-center shrink-0 select-none">
+                        {club.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-gray-800 text-sm truncate">
+                          {club.name}
+                        </h4>
+                        <p className="text-gray-400 text-xs mt-0.5">
+                          📂 {club.category || 'Kategori belirtilmemiş'}
+                        </p>
+                        <p className="text-gray-400 text-xs mt-0.5">
+                          👤 Danışman: {club.advisor_name || 'Belirtilmemiş'} ({club.advisor_email})
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* RIGHT SIDE */}
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.put(`/clubs/${club.id}/approve`);
+                            setPendingClubs(pendingClubs.filter((c) => c.id !== club.id));
+                            // Refresh stats dynamically
+                            const statsRes = await api.get('/sks/stats');
+                            setStats(statsRes.data);
+                          } catch (err) {
+                            console.error('Kulüp onaylanırken hata oluştu:', err);
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600 font-medium transition-colors focus:outline-none"
+                      >
+                        ✓ Onayla
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.put(`/clubs/${club.id}/reject`);
+                            setPendingClubs(pendingClubs.filter((c) => c.id !== club.id));
+                            // Refresh stats dynamically
+                            const statsRes = await api.get('/sks/stats');
+                            setStats(statsRes.data);
+                          } catch (err) {
+                            console.error('Kulüp reddedilirken hata oluştu:', err);
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg text-sm bg-red-500 text-white hover:bg-red-600 font-medium transition-colors focus:outline-none"
+                      >
+                        ✗ Reddet
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       case 'clubs':
