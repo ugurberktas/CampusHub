@@ -111,7 +111,7 @@ export default function SksPanel() {
   return (
     <div className="flex h-screen bg-[#f8f9fa] overflow-hidden font-sans">
       {/* LEFT SIDEBAR */}
-      <aside className="flex flex-col w-56 shrink-0 bg-[#800000] h-full text-white">
+      <aside className="flex flex-col w-64 shrink-0 bg-[#800000] h-full text-white">
         {/* TOP: Logo area */}
         <div className="p-5 border-b border-white/20 select-none">
           <div className="font-black text-lg tracking-tight">Campus Hub</div>
