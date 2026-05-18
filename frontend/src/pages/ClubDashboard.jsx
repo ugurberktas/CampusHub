@@ -18,6 +18,7 @@ export default function ClubDashboard() {
     end_time: '',
     capacity: '',
   });
+  const [members, setMembers] = useState([]);
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -44,6 +45,22 @@ export default function ClubDashboard() {
       setLoading(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await api.get(`/clubs/${club.id}/members`);
+        setMembers(response.data);
+      } catch (err) {
+        console.error('Üyeler yüklenirken hata oluştu:', err);
+        setMembers([]);
+      }
+    };
+
+    if (club && club.status === 'active') {
+      fetchMembers();
+    }
+  }, [club]);
 
   if (loading) {
     return (
@@ -299,8 +316,33 @@ export default function ClubDashboard() {
           </div>
 
           {/* Right Column */}
-          <div className="w-72 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-lg bg-white p-4 flex items-center justify-center">
-            <span className="text-gray-400 font-medium">Sağ Kolon</span>
+          <div className="w-72 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-lg bg-white p-4 flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-800 text-sm">Üyeler</h3>
+
+            {members.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-2">
+                <span className="text-3xl select-none">👥</span>
+                <p className="text-gray-400 text-sm">Henüz üye yok</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-1">
+                {members.map((member) => (
+                  <div key={member.id} className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#800000]/10 text-[#800000] font-bold text-xs flex items-center justify-center shrink-0 select-none">
+                      {(member.full_name || member.user?.full_name || member.role || 'M').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-gray-700 text-sm font-medium truncate">
+                        {member.full_name || member.user?.full_name || 'Kulüp Üyesi'}
+                      </p>
+                      <p className="text-gray-400 text-xs truncate">
+                        {member.department || member.user?.department || member.role || 'Üye'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
