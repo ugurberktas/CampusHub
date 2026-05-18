@@ -116,13 +116,13 @@ export default function SksPanel() {
                         {club.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-semibold text-gray-800 text-sm truncate">
+                        <h4 className="font-semibold text-gray-800 text-base truncate">
                           {club.name}
                         </h4>
-                        <p className="text-gray-400 text-xs mt-0.5">
+                        <p className="text-gray-400 text-sm mt-0.5">
                           📂 {club.category || 'Kategori belirtilmemiş'}
                         </p>
-                        <p className="text-gray-400 text-xs mt-0.5">
+                        <p className="text-gray-400 text-sm mt-0.5">
                           👤 Danışman: {club.advisor_name || 'Belirtilmemiş'} ({club.advisor_email})
                         </p>
                       </div>
@@ -142,7 +142,7 @@ export default function SksPanel() {
                             console.error('Kulüp onaylanırken hata oluştu:', err);
                           }
                         }}
-                        className="px-4 py-2 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600 font-medium transition-colors focus:outline-none"
+                        className="px-5 py-2.5 rounded-lg text-base bg-green-500 text-white hover:bg-green-600 font-medium transition-colors focus:outline-none"
                       >
                         ✓ Onayla
                       </button>
@@ -158,7 +158,7 @@ export default function SksPanel() {
                             console.error('Kulüp reddedilirken hata oluştu:', err);
                           }
                         }}
-                        className="px-4 py-2 rounded-lg text-sm bg-red-500 text-white hover:bg-red-600 font-medium transition-colors focus:outline-none"
+                        className="px-5 py-2.5 rounded-lg text-base bg-red-500 text-white hover:bg-red-600 font-medium transition-colors focus:outline-none"
                       >
                         ✗ Reddet
                       </button>
@@ -195,7 +195,7 @@ export default function SksPanel() {
   return (
     <div className="flex h-screen bg-[#f8f9fa] overflow-hidden font-sans">
       {/* LEFT SIDEBAR */}
-      <aside className="flex flex-col w-64 shrink-0 bg-[#800000] h-full text-white">
+      <aside className="flex flex-col w-56 shrink-0 bg-[#800000] h-full text-white">
         {/* TOP: Logo area */}
         <div className="p-5 border-b border-white/20 select-none">
           <div className="font-black text-lg tracking-tight">Campus Hub</div>
@@ -246,7 +246,7 @@ export default function SksPanel() {
       </aside>
 
       {/* RIGHT CONTENT AREA */}
-      <main className="flex-1 overflow-y-auto p-8 bg-[#f8f9fa] flex flex-col">
+      <main className="flex-1 overflow-y-auto p-6 bg-[#f8f9fa] flex flex-col">
         {renderContent()}
       </main>
     </div>
