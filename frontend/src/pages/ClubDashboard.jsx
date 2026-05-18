@@ -8,6 +8,17 @@ export default function ClubDashboard() {
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const [showForm, setShowForm] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    location: '',
+    start_time: '',
+    end_time: '',
+    capacity: '',
+  });
+
   useEffect(() => {
     const fetchClub = async () => {
       try {
@@ -177,8 +188,114 @@ export default function ClubDashboard() {
           </div>
 
           {/* Center Column */}
-          <div className="flex-1 border border-gray-200 rounded-xl bg-white p-4 min-h-[600px] flex items-center justify-center">
-            <span className="text-gray-400 font-medium">Ana Akış</span>
+          <div className="flex-1 flex flex-col gap-4">
+            {/* Create Event Button / Form Toggle */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              {!showForm ? (
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="w-full py-3 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000] transition-colors focus:outline-none"
+                >
+                  + Yeni Etkinlik Oluştur
+                </button>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-800 text-sm">
+                      Yeni Etkinlik
+                    </h3>
+                    <button
+                      onClick={() => setShowForm(false)}
+                      className="text-gray-400 hover:text-gray-600 text-sm focus:outline-none"
+                    >
+                      İptal
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="Etkinlik adı *"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
+                  />
+
+                  <textarea
+                    placeholder="Açıklama"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none resize-none h-20 focus:border-[#800000] transition-colors"
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Konum *"
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
+                  />
+
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-xs text-gray-400">Başlangıç</label>
+                      <input
+                        type="datetime-local"
+                        value={formData.start_time}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            start_time: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-xs text-gray-400">Bitiş</label>
+                      <input
+                        type="datetime-local"
+                        value={formData.end_time}
+                        onChange={(e) =>
+                          setFormData({ ...formData, end_time: e.target.value })
+                        }
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <input
+                    type="number"
+                    placeholder="Kontenjan (opsiyonel)"
+                    value={formData.capacity}
+                    onChange={(e) =>
+                      setFormData({ ...formData, capacity: e.target.value })
+                    }
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
+                  />
+
+                  <button className="w-full py-2.5 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000] transition-colors focus:outline-none">
+                    Etkinliği Kaydet
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Events List Empty State */}
+            <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center gap-3">
+              <span className="text-4xl select-none">📅</span>
+              <p className="text-gray-500 font-semibold text-sm">
+                Henüz etkinlik yok
+              </p>
+              <p className="text-gray-400 text-xs text-center">
+                İlk etkinliğini oluşturmak için yukarıdaki butona tıkla
+              </p>
+            </div>
           </div>
 
           {/* Right Column */}
