@@ -9,6 +9,7 @@ export default function SksPanel() {
   const [pendingClubs, setPendingClubs] = useState([]);
   const [activeClubs, setActiveClubs] = useState([]);
   const [students, setStudents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -53,10 +54,21 @@ export default function SksPanel() {
       }
     };
 
+    const fetchEvents = async () => {
+      try {
+        const response = await api.get('/events');
+        setAllEvents(response.data);
+      } catch (err) {
+        console.error('Etkinlikler yüklenirken hata oluştu:', err);
+        setAllEvents([]);
+      }
+    };
+
     fetchStats();
     fetchPendingClubs();
     fetchActiveClubs();
     fetchStudents();
+    fetchEvents();
   }, []);
 
   const menuItems = [
@@ -326,8 +338,61 @@ export default function SksPanel() {
         );
       case 'events':
         return (
-          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-            Etkinlik Radarı — gelecek
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-6">
+              Etkinlik Radarı
+            </h2>
+
+            {allEvents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <span className="text-5xl select-none">📅</span>
+                <p className="text-gray-400 text-sm">Henüz etkinlik yok</p>
+              </div>
+            ) : (
+              <div className="w-full bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Etkinlik
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Konum
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Tarih
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        Kontenjan
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allEvents.map((event) => (
+                      <tr
+                        key={event.id}
+                        className="hover:bg-gray-50 border-b border-gray-100 transition-colors"
+                      >
+                        <td className="px-4 py-3 text-sm text-gray-800 font-medium truncate max-w-[180px]">
+                          {event.title}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 truncate max-w-[150px]">
+                          {event.location || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {event.start_time
+                            ? new Date(event.start_time).toLocaleDateString('tr-TR')
+                            : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {event.capacity ? `${event.capacity} kişi` : 'Sınırsız'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         );
       default:
