@@ -8,6 +8,7 @@ import ToplulukGiris from './pages/ToplulukGiris';
 import SksGiris from './pages/SksGiris';
 import OgrenciKayit from './pages/OgrenciKayit';
 import ToplulukKayit from './pages/ToplulukKayit';
+import StudentDashboard from './pages/StudentDashboard';
 
 const getDashboardRoute = (role) => {
   switch (role) {
@@ -82,7 +83,7 @@ function App() {
         
         <Route path="/student-dashboard" element={
           <PrivateRoute allowedRole="student">
-            <div>Öğrenci Paneli - Yakında</div>
+            <StudentDashboard />
           </PrivateRoute>
         } />
         
