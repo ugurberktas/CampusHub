@@ -120,13 +120,33 @@ export default function StudentDashboard() {
         </div>
 
         {/* Center Column */}
-        <div className="flex-1 border border-gray-200 rounded-xl bg-white p-4 min-h-[600px] flex items-center justify-center text-gray-400 font-medium">
-          Ana Akış
+        <div className="flex-1 border border-gray-200 rounded-xl bg-white p-4">
+          <div className="flex flex-col items-center justify-center min-h-[600px] gap-3">
+            <span className="text-5xl select-none">📅</span>
+            <h3 className="text-gray-500 font-semibold text-lg">Henüz etkinlik yok</h3>
+            <p className="text-gray-400 text-sm text-center">
+              Topluluklar etkinlik oluşturdukça burada görünecek
+            </p>
+          </div>
         </div>
 
         {/* Right Column */}
-        <div className="w-72 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-lg bg-white p-4 flex items-center justify-center h-[450px] text-gray-400 font-medium">
-          Sağ Kolon
+        <div className="w-72 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
+          <div className="flex flex-col gap-3">
+            <h4 className="text-gray-500 font-semibold text-sm">Önerilen Topluluklar</h4>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
+              <div className="flex-1 h-3 rounded bg-gray-100" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
+              <div className="flex-1 h-3 rounded bg-gray-100" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
+              <div className="flex-1 h-3 rounded bg-gray-100" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
