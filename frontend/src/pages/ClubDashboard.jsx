@@ -6,6 +6,7 @@ export default function ClubDashboard() {
   const { user, logout } = useAuth();
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -66,9 +67,66 @@ export default function ClubDashboard() {
   if (club.status === 'active') {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
-        {/* Navbar Placeholder */}
-        <div className="sticky top-0 z-50 h-16 bg-[#800000] w-full flex items-center justify-center">
-          <span className="text-white font-semibold">Navbar — gelecek</span>
+        {/* Navbar */}
+        <div className="sticky top-0 z-50 h-16 bg-[#800000] w-full flex items-center justify-between px-6">
+          {/* Left: Logo */}
+          <span className="text-white font-bold text-lg">
+            Campus Hub
+          </span>
+
+          {/* Center: Search */}
+          <input
+            type="text"
+            placeholder="Etkinlik veya topluluk ara..."
+            className="bg-white/20 text-white placeholder-white/70 rounded-full px-4 py-1.5 w-64 outline-none text-sm"
+          />
+
+          {/* Right: Profile Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm"
+            >
+              {club.name.charAt(0).toUpperCase()}
+            </button>
+
+            {dropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50">
+                  {/* Section 1: Club Info */}
+                  <div className="bg-gray-50 rounded-t-xl p-3">
+                    <p className="text-gray-800 font-semibold text-sm">
+                      {club.name}
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      {user?.full_name}
+                    </p>
+                  </div>
+
+                  {/* Section 2: Links */}
+                  <div className="p-1">
+                    <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+                      👤 Kulüp Profili
+                    </button>
+                    <button className="w-full text-left px-3 py-2 text-sm text-gray-400 rounded-lg cursor-not-allowed opacity-50" disabled>
+                      ⚙️ Ayarlar
+                    </button>
+                  </div>
+
+                  {/* Section 3: Logout */}
+                  <div className="border-t border-gray-100 p-1">
+                    <button
+                      onClick={logout}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-[#800000] rounded-lg"
+                    >
+                      🚪 Çıkış Yap
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* 3 Column Layout */}
