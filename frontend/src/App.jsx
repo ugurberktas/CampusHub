@@ -8,6 +8,7 @@ import ToplulukGiris from './pages/ToplulukGiris';
 import SksGiris from './pages/SksGiris';
 import OgrenciKayit from './pages/OgrenciKayit';
 import ToplulukKayit from './pages/ToplulukKayit';
+import ClubDashboard from './pages/ClubDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 
 const getDashboardRoute = (role) => {
@@ -89,7 +90,7 @@ function App() {
         
         <Route path="/club-dashboard" element={
           <PrivateRoute allowedRole="club_owner">
-            <div>Topluluk Paneli - Yakında</div>
+            <ClubDashboard />
           </PrivateRoute>
         } />
         
