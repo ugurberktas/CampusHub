@@ -132,8 +132,48 @@ export default function ClubDashboard() {
         {/* 3 Column Layout */}
         <div className="flex flex-row gap-6 px-6 py-4 w-full">
           {/* Left Column */}
-          <div className="w-64 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-lg bg-white p-4 flex items-center justify-center">
-            <span className="text-gray-400 font-medium">Sol Kolon</span>
+          <div className="w-64 shrink-0 sticky top-16 h-fit flex flex-col">
+            {/* Top: Club Avatar + Name */}
+            <div className="bg-[#800000] rounded-t-xl p-5 flex flex-col items-center gap-2">
+              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold select-none">
+                {club.name.charAt(0).toUpperCase()}
+              </div>
+              <p className="text-white font-semibold text-sm text-center truncate w-full">
+                {club.name}
+              </p>
+              <p className="text-white/70 text-xs text-center truncate w-full">
+                {club.category || 'Kategori belirtilmemiş'}
+              </p>
+            </div>
+
+            {/* Middle: Stats */}
+            <div className="bg-white px-4 py-3 border-x border-gray-200 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">👥</span>
+                <span className="text-gray-600 text-sm">
+                  {club.member_count || 0} Üye
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">📅</span>
+                <span className="text-gray-600 text-sm">
+                  {club.event_count || 0} Etkinlik
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">🏛️</span>
+                <span className="text-gray-600 text-sm truncate">
+                  {club.advisor_name || 'Danışman belirtilmemiş'}
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom: Edit Button */}
+            <div className="bg-white rounded-b-xl px-4 pb-4 border-x border-b border-gray-200">
+              <button className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
+                Kulübü Düzenle
+              </button>
+            </div>
           </div>
 
           {/* Center Column */}
