@@ -7,6 +7,7 @@ export default function SksPanel() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
   const [pendingClubs, setPendingClubs] = useState([]);
+  const [activeClubs, setActiveClubs] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -29,8 +30,20 @@ export default function SksPanel() {
       }
     };
 
+    const fetchActiveClubs = async () => {
+      try {
+        const response = await api.get('/clubs');
+        const active = response.data.filter((c) => c.status === 'active');
+        setActiveClubs(active);
+      } catch (err) {
+        console.error('Aktif kulüpler yüklenirken hata oluştu:', err);
+        setActiveClubs([]);
+      }
+    };
+
     fetchStats();
     fetchPendingClubs();
+    fetchActiveClubs();
   }, []);
 
   const menuItems = [
@@ -171,8 +184,64 @@ export default function SksPanel() {
         );
       case 'clubs':
         return (
-          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-            Aktif Topluluklar — gelecek
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-6">
+              Aktif Topluluklar
+            </h2>
+
+            {activeClubs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <span className="text-5xl select-none">🏢</span>
+                <p className="text-gray-400 text-sm">Henüz aktif topluluk yok</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {activeClubs.map((club) => (
+                  <div
+                    key={club.id}
+                    className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between shadow-sm"
+                  >
+                    {/* LEFT SIDE */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#800000]/10 text-[#800000] font-bold text-sm flex items-center justify-center shrink-0 select-none">
+                        {club.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-gray-800 text-base truncate">
+                          {club.name}
+                        </h4>
+                        <p className="text-gray-400 text-sm mt-0.5">
+                          📂 {club.category || 'Kategori belirtilmemiş'}
+                        </p>
+                        <p className="text-gray-400 text-sm mt-0.5">
+                          👤 Danışman: {club.advisor_name || 'Belirtilmemiş'} ({club.advisor_email})
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* RIGHT SIDE */}
+                    <div className="shrink-0">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.put(`/clubs/${club.id}/suspend`);
+                            setActiveClubs(activeClubs.filter((c) => c.id !== club.id));
+                            // Refresh stats dynamically
+                            const statsRes = await api.get('/sks/stats');
+                            setStats(statsRes.data);
+                          } catch (err) {
+                            console.error('Topluluk askıya alınırken hata oluştu:', err);
+                          }
+                        }}
+                        className="px-5 py-2.5 rounded-lg text-sm bg-yellow-500 text-white hover:bg-yellow-600 font-medium transition-colors focus:outline-none"
+                      >
+                        ⏸ Askıya Al
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       case 'students':
