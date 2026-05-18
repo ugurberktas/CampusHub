@@ -8,6 +8,7 @@ export default function SksPanel() {
   const [stats, setStats] = useState(null);
   const [pendingClubs, setPendingClubs] = useState([]);
   const [activeClubs, setActiveClubs] = useState([]);
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -41,9 +42,21 @@ export default function SksPanel() {
       }
     };
 
+    const fetchStudents = async () => {
+      try {
+        const response = await api.get('/auth/users');
+        const filtered = response.data.filter((u) => u.role === 'student');
+        setStudents(filtered);
+      } catch (err) {
+        console.error('Öğrenciler yüklenirken hata oluştu:', err);
+        setStudents([]);
+      }
+    };
+
     fetchStats();
     fetchPendingClubs();
     fetchActiveClubs();
+    fetchStudents();
   }, []);
 
   const menuItems = [
@@ -246,8 +259,69 @@ export default function SksPanel() {
         );
       case 'students':
         return (
-          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-            Öğrenci Veritabanı — gelecek
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-1">
+              Öğrenci Veritabanı
+            </h2>
+            <p className="text-gray-400 text-sm mb-4">
+              {students.length} öğrenci kayıtlı
+            </p>
+
+            <div className="w-full bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Öğrenci
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Bölüm
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Sınıf
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr
+                      key={student.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-sm border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-[#800000]/10 text-[#800000] text-xs font-bold flex items-center justify-center shrink-0 select-none">
+                            {student.full_name ? student.full_name.charAt(0).toUpperCase() : 'Ö'}
+                          </div>
+                          <span className="text-gray-800 font-medium truncate max-w-[160px]">
+                            {student.full_name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm border-b border-gray-100 text-gray-600 truncate max-w-[150px]">
+                        {student.department || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm border-b border-gray-100 text-gray-600">
+                        {student.grade ? `${student.grade}. Sınıf` : '-'}
+                      </td>
+                      <td className="px-4 py-3 text-xs border-b border-gray-100 text-gray-400 truncate max-w-[180px]">
+                        {student.email}
+                      </td>
+                    </tr>
+                  ))}
+                  {students.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-4 py-8 text-center text-gray-400 text-sm">
+                        Kayıtlı öğrenci bulunamadı.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         );
       case 'events':
