@@ -9,6 +9,7 @@ import SksGiris from './pages/SksGiris';
 import OgrenciKayit from './pages/OgrenciKayit';
 import ToplulukKayit from './pages/ToplulukKayit';
 import ClubDashboard from './pages/ClubDashboard';
+import SksPanel from './pages/SksPanel';
 import StudentDashboard from './pages/StudentDashboard';
 
 const getDashboardRoute = (role) => {
@@ -96,7 +97,7 @@ function App() {
         
         <Route path="/sks-panel" element={
           <PrivateRoute allowedRole="sks_staff">
-            <div>SKS Paneli - Yakında</div>
+            <SksPanel />
           </PrivateRoute>
         } />
 
