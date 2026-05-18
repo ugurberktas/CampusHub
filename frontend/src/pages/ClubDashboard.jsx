@@ -62,6 +62,51 @@ export default function ClubDashboard() {
     }
   }, [club]);
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await api.get('/events');
+        const filtered = response.data.filter((e) => e.club_id === club.id);
+        setEvents(filtered);
+      } catch (err) {
+        console.error('Etkinlikler yüklenirken hata oluştu:', err);
+        setEvents([]);
+      }
+    };
+
+    if (club) {
+      fetchEvents();
+    }
+  }, [club]);
+
+  const handleCreateEvent = async () => {
+    if (!formData.title || !formData.location || !formData.start_time) {
+      alert('Etkinlik adı, konum ve başlangıç tarihi zorunludur.');
+      return;
+    }
+    try {
+      await api.post('/events', {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        start_time: formData.start_time,
+        end_time: formData.end_time || null,
+        capacity: formData.capacity ? parseInt(formData.capacity) : null,
+        club_id: club.id
+      });
+      setShowForm(false);
+      setFormData({
+        title: '', description: '', location: '',
+        start_time: '', end_time: '', capacity: ''
+      });
+      const res = await api.get('/events');
+      const filtered = res.data.filter((e) => e.club_id === club.id);
+      setEvents(filtered);
+    } catch (err) {
+      alert('Etkinlik oluşturulamadı.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] font-sans">
@@ -296,23 +341,49 @@ export default function ClubDashboard() {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
                   />
 
-                  <button className="w-full py-2.5 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000] transition-colors focus:outline-none">
+                  <button
+                    onClick={handleCreateEvent}
+                    className="w-full py-2.5 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000] transition-colors focus:outline-none"
+                  >
                     Etkinliği Kaydet
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Events List Empty State */}
-            <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center gap-3">
-              <span className="text-4xl select-none">📅</span>
-              <p className="text-gray-500 font-semibold text-sm">
-                Henüz etkinlik yok
-              </p>
-              <p className="text-gray-400 text-xs text-center">
-                İlk etkinliğini oluşturmak için yukarıdaki butona tıkla
-              </p>
-            </div>
+            {/* Events List */}
+            {events.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center gap-3 animate-fade-in">
+                <span className="text-4xl select-none">📅</span>
+                <p className="text-gray-500 font-semibold text-sm">
+                  Henüz etkinlik yok
+                </p>
+                <p className="text-gray-400 text-xs text-center">
+                  İlk etkinliğini oluşturmak için yukarıdaki butona tıkla
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {events.map((event) => (
+                  <div
+                    key={event.id}
+                    className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="min-w-0 flex flex-col gap-1">
+                      <h4 className="font-semibold text-gray-800 text-sm truncate">
+                        {event.title}
+                      </h4>
+                      <p className="text-gray-400 text-xs truncate">
+                        📍 {event.location || '-'}
+                      </p>
+                    </div>
+                    <span className="text-gray-400 text-xs shrink-0 font-medium bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
+                      📅 {new Date(event.start_time).toLocaleDateString('tr-TR')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column */}
