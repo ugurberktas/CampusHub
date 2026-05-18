@@ -64,6 +64,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 33. **Topluluk Kayıt Rol Alanı (`ToplulukKayit.jsx`):** `handleSubmit` içerisindeki `/auth/register` istek gövdesine `role: 'club_owner'` alanı eklendi — kulüp başkanları artık kayıt sırasında doğru rolle oluşturuluyor ✔
 34. **AuthContext Login Düzeltmesi (`AuthContext.jsx`):** Login fonksiyonu güncellendi. Token alındıktan sonra `GET /auth/me` çağrısıyla gerçek kullanıcı objesi (id, email, role vb.) alınıp localStorage ve state'e kaydediliyor — artık token response objesi değil, gerçek kullanıcı bilgisi saklanıyor ✔
 35. **StudentDashboard.jsx:** layout skeleton ✅
+36. **ClubDashboard.jsx:** pending status check skeleton ✅
 
 ---
 
