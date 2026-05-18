@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 export default function SksPanel() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/sks/stats');
+        setStats(response.data);
+      } catch (err) {
+        console.error('İstatistikler yüklenirken hata oluştu:', err);
+        setStats(null);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const menuItems = [
     { key: 'dashboard', label: 'Genel Bakış', icon: '📊' },
@@ -16,15 +32,77 @@ export default function SksPanel() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <div className="text-gray-400 text-sm">Genel Bakış — gelecek</div>;
+        return (
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-6">Genel Bakış</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Card 1 */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-2">
+                <span className="text-2xl select-none">👥</span>
+                <span className="text-3xl font-black text-gray-800">
+                  {stats?.total_students ?? stats?.total_users ?? 0}
+                </span>
+                <span className="text-sm text-gray-400">Kayıtlı Öğrenci</span>
+              </div>
+
+              {/* Card 2 */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-2">
+                <span className="text-2xl select-none">🏢</span>
+                <span className="text-3xl font-black text-gray-800">
+                  {stats?.active_clubs ?? stats?.total_clubs ?? 0}
+                </span>
+                <span className="text-sm text-gray-400">Aktif Topluluk</span>
+              </div>
+
+              {/* Card 3 */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-2">
+                <span className="text-2xl select-none">⏳</span>
+                <span
+                  className={`text-3xl font-black ${
+                    (stats?.pending_clubs ?? 0) > 0 ? 'text-[#800000]' : 'text-gray-800'
+                  }`}
+                >
+                  {stats?.pending_clubs ?? 0}
+                </span>
+                <span className="text-sm text-gray-400">Onay Bekleyen</span>
+              </div>
+
+              {/* Card 4 */}
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-2">
+                <span className="text-2xl select-none">📅</span>
+                <span className="text-3xl font-black text-gray-800">
+                  {stats?.total_events ?? 0}
+                </span>
+                <span className="text-sm text-gray-400">Toplam Etkinlik</span>
+              </div>
+            </div>
+          </div>
+        );
       case 'pending':
-        return <div className="text-gray-400 text-sm">Onay Bekleyenler — gelecek</div>;
+        return (
+          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
+            Onay Bekleyenler — gelecek
+          </div>
+        );
       case 'clubs':
-        return <div className="text-gray-400 text-sm">Aktif Topluluklar — gelecek</div>;
+        return (
+          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
+            Aktif Topluluklar — gelecek
+          </div>
+        );
       case 'students':
-        return <div className="text-gray-400 text-sm">Öğrenci Veritabanı — gelecek</div>;
+        return (
+          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
+            Öğrenci Veritabanı — gelecek
+          </div>
+        );
       case 'events':
-        return <div className="text-gray-400 text-sm">Etkinlik Radarı — gelecek</div>;
+        return (
+          <div className="flex h-full items-center justify-center text-gray-400 text-sm">
+            Etkinlik Radarı — gelecek
+          </div>
+        );
       default:
         return null;
     }
@@ -84,7 +162,7 @@ export default function SksPanel() {
       </aside>
 
       {/* RIGHT CONTENT AREA */}
-      <main className="flex-1 overflow-y-auto p-6 flex items-center justify-center">
+      <main className="flex-1 overflow-y-auto p-8 bg-[#f8f9fa] flex flex-col">
         {renderContent()}
       </main>
     </div>
