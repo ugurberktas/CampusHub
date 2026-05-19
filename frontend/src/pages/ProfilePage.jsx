@@ -121,8 +121,65 @@ export default function ProfilePage() {
 
         <div className="flex gap-6 w-full">
           {/* Left Column */}
-          <div className="w-72 shrink-0">
-            Sol Kolon
+          <div className="w-72 shrink-0 flex flex-col gap-4">
+
+            {/* Profile Card */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              
+              {/* Top: Avatar + Info */}
+              <div className="bg-[#800000] p-6 flex flex-col items-center gap-2">
+                <div className="w-20 h-20 rounded-full bg-white/20 
+                  flex items-center justify-center 
+                  text-white text-3xl font-bold">
+                  {user?.full_name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
+                </div>
+                <p className="text-white font-bold text-base text-center">
+                  {user?.full_name}
+                </p>
+                <p className="text-white/70 text-xs text-center">
+                  {user?.department}
+                </p>
+              </div>
+
+              {/* Middle: Details */}
+              <div className="p-4 flex flex-col gap-2 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🎓</span>
+                  <span className="text-gray-600 text-sm">
+                    {user?.grade ? `${user.grade}. Sınıf` : 'Sınıf belirtilmemiş'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">📧</span>
+                  <span className="text-gray-600 text-sm">
+                    {user?.email}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">👥</span>
+                  <span className="text-gray-600 text-sm">
+                    {myClubs.length} Topluluk Üyeliği
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">📅</span>
+                  <span className="text-gray-600 text-sm">
+                    {myEvents.length} Etkinlik Kaydı
+                  </span>
+                </div>
+              </div>
+
+              {/* Bottom: Back Button */}
+              <div className="p-4">
+                <button
+                  onClick={() => navigate('/student-dashboard')}
+                  className="w-full py-2 rounded-lg text-sm
+                  text-gray-500 border border-gray-300
+                  hover:border-gray-400 hover:text-gray-700">
+                  ← Dashboard'a Dön
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Right Column */}

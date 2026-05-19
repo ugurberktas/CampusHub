@@ -11,6 +11,7 @@ import ToplulukKayit from './pages/ToplulukKayit';
 import ClubDashboard from './pages/ClubDashboard';
 import SksPanel from './pages/SksPanel';
 import StudentDashboard from './pages/StudentDashboard';
+import ProfilePage from './pages/ProfilePage';
 
 const getDashboardRoute = (role) => {
   switch (role) {
@@ -86,6 +87,12 @@ function App() {
         <Route path="/student-dashboard" element={
           <PrivateRoute allowedRole="student">
             <StudentDashboard />
+          </PrivateRoute>
+        } />
+        
+        <Route path="/profile" element={
+          <PrivateRoute allowedRole="student">
+            <ProfilePage />
           </PrivateRoute>
         } />
         
