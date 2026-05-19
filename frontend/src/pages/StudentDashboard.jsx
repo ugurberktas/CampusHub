@@ -189,11 +189,11 @@ export default function StudentDashboard() {
                     <div className="w-10 h-10 rounded-full bg-[#800000]/10 
                       text-[#800000] font-bold text-sm flex items-center 
                       justify-center shrink-0">
-                      {event.club_id?.charAt(0).toUpperCase() || 'K'}
+                      {(clubs.find(c => c.id === event.club_id)?.name || 'K').charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <p className="text-gray-800 font-semibold text-sm">
-                        {event.club_name || 'Kampüs Kulübü'}
+                        {clubs.find(c => c.id === event.club_id)?.name || 'Kampüs Kulübü'}
                       </p>
                       <p className="text-gray-400 text-xs">
                         {event.event_date 
