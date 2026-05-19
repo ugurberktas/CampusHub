@@ -96,6 +96,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 65. **Uygulama Yönlendirme Ayarları (`frontend/src/App.jsx`):** Profil sayfası (`ProfilePage`) içe aktarıldı (import) ve `/profile` path'i öğrenci rolü (`student`) kısıtlaması altında `PrivateRoute` ile Route tablosuna dahil edildi ✔
 66. **Profil Sayfası Sol Kolon Entegrasyonu (`frontend/src/pages/ProfilePage.jsx`):** Sol kolon yer tutucu (placeholder) alanı; avatar, isim, bölüm, sınıf, e-posta, kayıtlı olunan topluluk ve etkinlik sayılarını dinamik olarak gösteren detaylı bir profil kartı ile değiştirildi ✔
 67. **Profil Sayfası Sağ Kolon Entegrasyonu (`frontend/src/pages/ProfilePage.jsx`):** Sağ kolon yer tutucu alanı; "Etkinliklerim" ve "Topluluklarım" sekmelerinden oluşan, etkinlik kaydı iptal etme (`unregister`) ve topluluktan ayrılma (`leave`) API eylemlerine sahip dinamik liste sekmeleriyle güncellendi ✔
+68. **StudentDashboard.jsx (Profil Yönlendirme Entegrasyonu):** Kullanıcı menüsündeki "Profilim" butonuna tıklandığında `/profile` sayfasına yönlendirme yapabilmesi için `useNavigate` hook'u içe aktarıldı ve `onClick={() => navigate('/profile')}` tetikleyicisi bu butona eklendi ✔
 
 ---
 
