@@ -39,6 +39,8 @@ class UserListResponse(BaseModel):
     email: str
     role: str
     is_verified: bool
+    department: Optional[str] = None
+    grade: Optional[str] = None
     created_at: Optional[datetime] = None
 
 

@@ -298,29 +298,29 @@ export default function SksPanel() {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => (
+                  {students.map((user) => (
                     <tr
-                      key={student.id}
+                      key={user.id}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-3 text-sm border-b border-gray-100">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-[#800000]/10 text-[#800000] text-xs font-bold flex items-center justify-center shrink-0 select-none">
-                            {student.full_name ? student.full_name.charAt(0).toUpperCase() : 'Ö'}
+                            {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'Ö'}
                           </div>
                           <span className="text-gray-800 font-medium truncate max-w-[160px]">
-                            {student.full_name}
+                            {user.full_name}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm border-b border-gray-100 text-gray-600 truncate max-w-[150px]">
-                        {student.department || '-'}
+                        {user.department || '-'}
                       </td>
                       <td className="px-4 py-3 text-sm border-b border-gray-100 text-gray-600">
-                        {student.grade ? `${student.grade}. Sınıf` : '-'}
+                        {user.grade ? `${user.grade}. Sınıf` : '-'}
                       </td>
                       <td className="px-4 py-3 text-xs border-b border-gray-100 text-gray-400 truncate max-w-[180px]">
-                        {student.email}
+                        {user.email}
                       </td>
                     </tr>
                   ))}
@@ -380,8 +380,8 @@ export default function SksPanel() {
                           {event.location || '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
-                          {event.start_time
-                            ? new Date(event.start_time).toLocaleDateString('tr-TR')
+                          {event.event_date
+                            ? new Date(event.event_date).toLocaleDateString('tr-TR')
                             : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">

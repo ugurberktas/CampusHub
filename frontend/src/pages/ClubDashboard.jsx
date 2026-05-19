@@ -475,26 +475,35 @@ export default function ClubDashboard() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100 flex flex-col">
                 {events.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow"
+                    className="flex flex-row items-center justify-between p-4 hover:bg-gray-50/50 transition-colors gap-4"
                   >
-                    {event.image_url && (
-                      <img src={event.image_url} 
-                        className="w-full h-40 object-cover"
-                      />
-                    )}
-                    <div className="p-4 border-b border-gray-100">
-                      <h4 className="font-bold text-gray-800 text-base">
+                    {/* Sol: Etkinlik Afişi */}
+                    <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+                      {event.image_url ? (
+                        <img 
+                          src={event.image_url} 
+                          alt={event.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[#800000] to-rose-900 flex flex-col items-center justify-center text-white text-[10px] font-bold select-none gap-0.5">
+                          <span>CH</span>
+                          <span className="text-[6px] opacity-70">Campus Hub</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Orta: Detaylar */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-850 text-sm sm:text-base truncate">
                         {event.title}
                       </h4>
-                      <div className="flex gap-2 mt-1">
-                        <span className="text-gray-400 text-sm">
-                          📍 {event.location || '-'}
-                        </span>
-                        <span className="text-gray-400 text-sm">
+                      <div className="flex flex-col gap-1 mt-1 text-xs text-gray-500">
+                        <span className="truncate">
                           📅 {event.event_date 
                             ? new Date(event.event_date).toLocaleString('tr-TR', {
                                 day: '2-digit', month: 'long', year: 'numeric',
@@ -502,24 +511,30 @@ export default function ClubDashboard() {
                               })
                             : 'Tarih belirtilmemiş'}
                         </span>
+                        <span className="truncate">📍 {event.location || '-'}</span>
+                        <span className="font-medium text-[#800000]">
+                          👤 {event.registration_count || 0} kayıtlı
+                        </span>
                       </div>
                     </div>
-                    <div className="p-3 flex gap-2">
+
+                    {/* Sağ: Butonlar */}
+                    <div className="flex flex-col gap-1 shrink-0 w-32">
                       <button
                         onClick={() => handleViewRegistrations(event)}
-                        className="flex-1 py-2 rounded-lg bg-[#800000] text-white text-xs font-semibold hover:bg-[#6b0000] transition-colors focus:outline-none"
+                        className="w-full py-1 px-2 rounded border border-[#800000] text-[#800000] text-xs font-semibold hover:bg-[#800000]/5 transition-colors focus:outline-none text-center"
                       >
-                        Kayıt Olanları Gör
+                        Kayıt Olanları
                       </button>
                       <button
                         onClick={() => setEditingEvent(event)}
-                        className="px-3 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs hover:bg-gray-50 transition-colors focus:outline-none"
+                        className="w-full py-1 px-2 rounded border border-gray-200 text-gray-600 text-xs font-semibold hover:bg-gray-50 transition-colors focus:outline-none text-center"
                       >
                         Düzenle
                       </button>
                       <button
                         onClick={() => handleDeleteEvent(event.id)}
-                        className="px-3 py-2 rounded-lg border border-red-200 text-red-500 text-xs hover:bg-red-50 transition-colors focus:outline-none"
+                        className="w-full py-1 px-2 rounded border border-red-200 text-red-500 text-xs font-semibold hover:bg-red-50 transition-colors focus:outline-none text-center"
                       >
                         Sil
                       </button>

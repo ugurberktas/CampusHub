@@ -13,7 +13,7 @@ def get_sks_stats(
     current_user: User = Depends(require_role("sks_staff")),
     db: Session = Depends(get_db),
 ):
-    total_users = db.query(User).count()
+    total_users = db.query(User).filter(User.role == "student").count()
     total_clubs = db.query(Club).count()
     total_events = db.query(Event).count()
     return {
