@@ -181,77 +181,126 @@ export default function StudentDashboard() {
               {events.map((event) => (
                 <div
                   key={event.id}
-                  className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-white rounded-2xl border border-gray-200 
+                    overflow-hidden mb-4 shadow-sm"
                 >
-                  {event.image_url && (
-                    <img
-                      src={event.image_url}
-                      alt={event.title}
-                      className="w-full h-48 object-cover"
-                    />
+                  {/* Card Header: Club Info */}
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="w-10 h-10 rounded-full bg-[#800000]/10 
+                      text-[#800000] font-bold text-sm flex items-center 
+                      justify-center shrink-0">
+                      {event.club_id?.charAt(0).toUpperCase() || 'K'}
+                    </div>
+                    <div>
+                      <p className="text-gray-800 font-semibold text-sm">
+                        {event.club_name || 'Kampüs Kulübü'}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        {event.event_date 
+                          ? new Date(event.event_date)
+                            .toLocaleDateString('tr-TR', {
+                              day: 'numeric', month: 'long', year: 'numeric'
+                            })
+                          : '-'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card Image: edge-to-edge */}
+                  {event.image_url ? (
+                    <img src={event.image_url}
+                      className="w-full h-56 object-cover"
+                      alt={event.title} />
+                  ) : (
+                    <div className="w-full h-56 bg-gradient-to-br 
+                      from-rose-900 to-gray-900 flex flex-col 
+                      items-center justify-center gap-2">
+                      <div className="text-white/20 text-6xl font-black">
+                        CH
+                      </div>
+                      <p className="text-white/40 text-xs font-medium">
+                        Campus Hub
+                      </p>
+                    </div>
                   )}
-                  <div className="p-4 flex flex-col gap-2">
-                    <h4 className="font-bold text-gray-800 text-base">
-                      {event.title}
-                    </h4>
+
+                  {/* Card Body */}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="text-gray-800 font-bold text-base">
+                        {event.title}
+                      </h3>
+                      {event.capacity && (
+                        <span className="shrink-0 text-xs px-2 py-1 
+                          rounded-full bg-gray-100 text-gray-500 font-medium">
+                          {event.registration_count}/{event.capacity}
+                        </span>
+                      )}
+                    </div>
+
                     {event.description && (
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-gray-500 text-sm line-clamp-2 mb-2">
                         {event.description}
                       </p>
                     )}
-                    <div className="flex flex-col gap-1 mt-1">
-                      <span className="text-gray-400 text-sm flex items-center gap-1.5">
-                        📍 {event.location || 'Konum belirtilmemiş'}
-                      </span>
-                      <span className="text-gray-400 text-sm flex items-center gap-1.5">
-                        📅 {event.event_date
-                          ? new Date(event.event_date).toLocaleDateString('tr-TR')
-                          : 'Tarih belirtilmemiş'}
+
+                    <div className="flex items-center gap-3 text-xs 
+                      text-gray-400 mb-3">
+                      <span>📍 {event.location}</span>
+                      <span>🕐 {event.event_date 
+                        ? new Date(event.event_date)
+                          .toLocaleTimeString('tr-TR', {
+                            hour: '2-digit', minute: '2-digit'
+                          })
+                        : '-'}
                       </span>
                     </div>
-                    {(() => {
-                      const isFull = event.capacity !== null && 
-                        event.registration_count >= event.capacity;
-                      const isRegistered = registeredEvents.includes(event.id);
 
-                      if (isRegistered) {
-                        return (
-                          <button className="w-full mt-3 py-2.5 rounded-lg 
-                            bg-green-500 text-white font-semibold text-sm
+                    {/* Social Proof + Button */}
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-gray-400 text-xs">
+                        🔥 {event.registration_count || 0} öğrenci katılıyor
+                      </p>
+
+                      {(() => {
+                        const isFull = event.capacity !== null && 
+                          event.registration_count >= event.capacity;
+                        const isRegistered = registeredEvents.includes(event.id);
+
+                        if (isRegistered) return (
+                          <button className="px-4 py-2 rounded-xl 
+                            bg-green-500 text-white text-sm font-semibold
                             cursor-not-allowed">
                             ✓ Kayıtlısınız
                           </button>
                         );
-                      }
 
-                      if (isFull) {
-                        return (
-                          <button disabled
-                            className="w-full mt-3 py-2.5 rounded-lg 
-                            bg-gray-200 text-gray-400 font-semibold text-sm
+                        if (isFull) return (
+                          <button disabled className="px-4 py-2 rounded-xl 
+                            bg-gray-200 text-gray-400 text-sm font-semibold
                             cursor-not-allowed">
                             Kontenjan Doldu
                           </button>
                         );
-                      }
 
-                      return (
-                        <button
-                          onClick={async () => {
-                            try {
-                              await api.post(`/events/${event.id}/register`);
-                              setRegisteredEvents(prev => [...prev, event.id]);
-                            } catch {
-                              alert('Zaten kayıtlısınız!');
-                            }
-                          }}
-                          className="w-full mt-3 py-2.5 rounded-lg 
-                          bg-[#800000] text-white font-semibold text-sm 
-                          hover:bg-[#6b0000]">
-                          Kayıt Ol
-                        </button>
-                      );
-                    })()}
+                        return (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await api.post(`/events/${event.id}/register`);
+                                setRegisteredEvents(prev => [...prev, event.id]);
+                              } catch {
+                                alert('Zaten kayıtlısınız!');
+                              }
+                            }}
+                            className="px-4 py-2 rounded-xl bg-[#800000] 
+                            text-white text-sm font-semibold 
+                            hover:bg-[#6b0000] transition-colors">
+                            Kayıt Ol
+                          </button>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               ))}

@@ -98,6 +98,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 67. **Profil Sayfası Sağ Kolon Entegrasyonu (`frontend/src/pages/ProfilePage.jsx`):** Sağ kolon yer tutucu alanı; "Etkinliklerim" ve "Topluluklarım" sekmelerinden oluşan, etkinlik kaydı iptal etme (`unregister`) ve topluluktan ayrılma (`leave`) API eylemlerine sahip dinamik liste sekmeleriyle güncellendi ✔
 68. **StudentDashboard.jsx (Profil Yönlendirme Entegrasyonu):** Kullanıcı menüsündeki "Profilim" butonuna tıklandığında `/profile` sayfasına yönlendirme yapabilmesi için `useNavigate` hook'u içe aktarıldı ve `onClick={() => navigate('/profile')}` tetikleyicisi bu butona eklendi ✔
 69. **StudentDashboard.jsx (Etkinlik Kaydı Kontenjan Denetimi):** Etkinlik listesindeki "Kayıt Ol" butonu; eğer etkinlik kontenjanı dolmuşsa (`event.registration_count >= event.capacity`) pasif (disabled) hale getirilip "Kontenjan Doldu" yazısı gösterecek şekilde IIFE yapısıyla güncellendi ✔
+70. **StudentDashboard.jsx (Etkinlik Kartı Tasarım Güncellemesi):** Etkinlik kartları; kulüp bilgisi (kulüp ismi, logo baş harfi ve tarih) içeren bir başlık alanı, kenardan kenara görsel (varsayılan degrade görsel dahil), başlık, kapasite oranı, açıklama, konum/saat bilgileri ve sosyal kanıt (öğrenci katılım sayısı) içeren LinkedIn/Instagram benzeri modern bir tasarıma kavuşturuldu ✔
 
 ---
 
