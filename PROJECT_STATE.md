@@ -63,8 +63,18 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 32. **Topluluk Kayıt API Mantığı (`ToplulukKayit.jsx`):** Boş bırakılan `handleSubmit` fonksiyonu dolduruldu. Sırasıyla: kullanıcı kaydı (`/auth/register`), dönen token ile kulüp oluşturma (`/clubs`) yapılıyor; başarıda 3 saniye sonra `/topluluk-girisi`ne yönlendiriliyor, hatalarda backend mesajı form üzerinde gösteriliyor ✔
 33. **Topluluk Kayıt Rol Alanı (`ToplulukKayit.jsx`):** `handleSubmit` içerisindeki `/auth/register` istek gövdesine `role: 'club_owner'` alanı eklendi — kulüp başkanları artık kayıt sırasında doğru rolle oluşturuluyor ✔
 34. **AuthContext Login Düzeltmesi (`AuthContext.jsx`):** Login fonksiyonu güncellendi. Token alındıktan sonra `GET /auth/me` çağrısıyla gerçek kullanıcı objesi (id, email, role vb.) alınıp localStorage ve state'e kaydediliyor — artık token response objesi değil, gerçek kullanıcı bilgisi saklanıyor ✔
-35. **StudentDashboard.jsx:** layout skeleton ✅
-36. **ClubDashboard.jsx:** pending status check skeleton ✅
+35. **Salonlar ve Rezervasyonlar API (`backend/app/routers/salons.py`):** `salons.py` router'ı oluşturularak `GET /salons` ve `POST /salon_reservations` endpoint'leri eklendi ve `backend/main.py`'e dahil edildi ✔
+36. **StudentDashboard.jsx:** layout skeleton ✅
+37. **ClubDashboard.jsx:** pending status check skeleton ✅
+38. **ClubDashboard.jsx (Etkinlik Oluşturma Geliştirmesi):** Etkinlik oluşturma formuna salon seçimi (dropdown) ve afiş (image URL) girdileri eklendi; salon seçildiğinde otomatik olarak `POST /salon_reservations` çağrısı yapılması sağlandı ✔
+39. **Görsel Yükleme Servisi (`backend/app/routers/upload.py`):** `upload.py` router'ı oluşturularak `POST /upload` endpoint'i eklendi (5MB boyut ve resim uzantısı doğrulama mantığı dahil) ve `backend/main.py` içerisine statik dosya sunum alanı (`/static`) ile birlikte entegre edildi ✔
+40. **ClubDashboard.jsx (Dosya Yükleme Entegrasyonu):** Etkinlik afişi alanı için olan metin girdisi, gerçek dosya yükleme (`POST /upload` üzerinden) ve yüklenen resim için canlı önizleme sunan dosya girdisi (`input type="file"`) ile değiştirildi ✔
+41. **ClubDashboard.jsx (EventCreate Şema Uyumluluğu):** `handleCreateEvent` içerisindeki `/events` istek gövdesi backend tarafındaki `EventCreate` Pydantic şeması ile tam uyumlu hale getirildi (start_time yerine event_date kullanıldı, expected_attendance_rate eklendi, gereksiz image_url ve end_time alanları çıkarıldı) ✔
+42. **ClubMemberResponse Şema Düzeltmesi (`backend/app/schemas.py`):** Üye listeleme endpoint'inde (`GET /clubs/{club_id}/members`) oluşan ResponseValidationError hatasını önlemek için `joined_at` alanı `datetime | None = None` olarak isteğe bağlı (optional) hale getirildi ✔
+43. **Salon Rezervasyon API Hata Düzeltmesi (`backend/app/routers/salons.py`):** `POST /salon_reservations` endpoint'inde oluşan `ResponseValidationError` hatasını gidermek için: `ReservationResponse` şemasındaki `reservation_date` alanı `date | None = None` (tarih objesi) olarak güncellendi ve nesne oluşturulurken gelen değer string'e dönüştürüldü ✔
+44. **ClubDashboard.jsx (Etkinlik ve Üye Kartları Tasarım Düzeltmesi):** Etkinlik kartlarında yeni `event_date` alanı formatlanarak gösterildi, afiş resmi (`image_url`) varsa kartın üst kısmında gösterilecek şekilde düzenlendi; üye listesindeki avatar ve isim gösterimi fallback mantıklarıyla güçlendirildi (`member.full_name || 'İsimsiz Üye'`) ✔
+45. **StudentDashboard.jsx (Etkinlik Akışı ve Kayıt):** Öğrenci panelinin orta sütunundaki boş durum, `GET /events` üzerinden gelen dinamik etkinlik akışı ile değiştirildi; afiş görseli desteği, tarih/konum formatlaması ve `POST /events/{id}/register` üzerinden çalışan "Kayıt Ol" butonu eklendi ✔
+46. **StudentDashboard.jsx (Kayıt Durumu ve Buton İyileştirmesi):** Öğrenci panelinde kayıt durumunu takip etmek için `registeredEvents` state'i eklendi; kayıtlı olunan etkinlikler için buton pasif ve yeşil renkli ("✓ Kayıtlısınız") olarak render edilecek şekilde güncellendi ✔
 
 ---
 

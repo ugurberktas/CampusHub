@@ -17,8 +17,11 @@ export default function ClubDashboard() {
     start_time: '',
     end_time: '',
     capacity: '',
+    salon_id: '',
+    image_url: '',
   });
   const [members, setMembers] = useState([]);
+  const [salons, setSalons] = useState([]);
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -68,6 +71,9 @@ export default function ClubDashboard() {
         const response = await api.get('/events');
         const filtered = response.data.filter((e) => e.club_id === club.id);
         setEvents(filtered);
+
+        const salonsRes = await api.get('/salons');
+        setSalons(salonsRes.data);
       } catch (err) {
         console.error('Etkinlikler yüklenirken hata oluştu:', err);
         setEvents([]);
@@ -79,6 +85,21 @@ export default function ClubDashboard() {
     }
   }, [club]);
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await api.post('/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setFormData(prev => ({...prev, image_url: res.data.url}));
+    } catch (err) {
+      alert('Fotoğraf yüklenemedi.');
+    }
+  };
+
   const handleCreateEvent = async () => {
     if (!formData.title || !formData.location || !formData.start_time) {
       alert('Etkinlik adı, konum ve başlangıç tarihi zorunludur.');
@@ -86,18 +107,29 @@ export default function ClubDashboard() {
     }
     try {
       await api.post('/events', {
+        club_id: club.id,
         title: formData.title,
-        description: formData.description,
+        description: formData.description || null,
         location: formData.location,
-        start_time: formData.start_time,
-        end_time: formData.end_time || null,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
-        club_id: club.id
+        event_date: formData.start_time,
+        expected_attendance_rate: 0.7
       });
+
+      if (formData.salon_id) {
+        await api.post('/salon_reservations', {
+          salon_id: formData.salon_id,
+          club_id: club.id,
+          reservation_date: formData.start_time.split('T')[0],
+          time_slot: formData.start_time.split('T')[1]
+        });
+      }
+
       setShowForm(false);
       setFormData({
         title: '', description: '', location: '',
-        start_time: '', end_time: '', capacity: ''
+        start_time: '', end_time: '', capacity: '',
+        salon_id: '', image_url: ''
       });
       const res = await api.get('/events');
       const filtered = res.data.filter((e) => e.club_id === club.id);
@@ -303,6 +335,41 @@ export default function ClubDashboard() {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors"
                   />
 
+                  <select
+                    value={formData.salon_id}
+                    onChange={e => setFormData({...formData, salon_id: e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] transition-colors text-gray-700">
+                    <option value="">Salon seçin (opsiyonel)</option>
+                    {salons.map(salon => (
+                      <option key={salon.id} value={salon.id}>
+                        {salon.name} ({salon.capacity} kişilik)
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-gray-400">
+                      Etkinlik Afişi (opsiyonel)
+                    </label>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      onChange={handleImageUpload}
+                      className="w-full border border-gray-200 rounded-lg 
+                      px-3 py-2 text-sm text-gray-600
+                      file:mr-3 file:py-1 file:px-3 file:rounded-lg 
+                      file:border-0 file:bg-[#800000] file:text-white 
+                      file:text-xs file:cursor-pointer cursor-pointer"
+                    />
+                    {formData.image_url && (
+                      <img 
+                        src={formData.image_url} 
+                        alt="Afiş önizleme"
+                        className="w-full h-32 object-cover rounded-lg mt-1"
+                      />
+                    )}
+                  </div>
+
                   <div className="flex gap-2">
                     <div className="flex-1 flex flex-col gap-1">
                       <label className="text-xs text-gray-400">Başlangıç</label>
@@ -367,19 +434,28 @@ export default function ClubDashboard() {
                 {events.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-white rounded-xl border border-gray-200 flex flex-col shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                   >
-                    <div className="min-w-0 flex flex-col gap-1">
-                      <h4 className="font-semibold text-gray-800 text-sm truncate">
-                        {event.title}
-                      </h4>
-                      <p className="text-gray-400 text-xs truncate">
-                        📍 {event.location || '-'}
-                      </p>
+                    {event.image_url && (
+                      <img src={event.image_url} 
+                        className="w-full h-40 object-cover rounded-t-xl"
+                      />
+                    )}
+                    <div className="p-4 flex items-center justify-between">
+                      <div className="min-w-0 flex flex-col gap-1">
+                        <h4 className="font-semibold text-gray-800 text-sm truncate">
+                          {event.title}
+                        </h4>
+                        <p className="text-gray-400 text-xs truncate">
+                          📍 {event.location || '-'}
+                        </p>
+                      </div>
+                      <span className="text-gray-400 text-xs shrink-0 font-medium bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
+                        📅 {event.event_date 
+                          ? new Date(event.event_date).toLocaleDateString('tr-TR')
+                          : 'Tarih belirtilmemiş'}
+                      </span>
                     </div>
-                    <span className="text-gray-400 text-xs shrink-0 font-medium bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
-                      📅 {new Date(event.start_time).toLocaleDateString('tr-TR')}
-                    </span>
                   </div>
                 ))}
               </div>
@@ -400,11 +476,11 @@ export default function ClubDashboard() {
                 {members.map((member) => (
                   <div key={member.id} className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-[#800000]/10 text-[#800000] font-bold text-xs flex items-center justify-center shrink-0 select-none">
-                      {(member.full_name || member.user?.full_name || member.role || 'M').charAt(0).toUpperCase()}
+                      {member.full_name?.charAt(0) || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-gray-700 text-sm font-medium truncate">
-                        {member.full_name || member.user?.full_name || 'Kulüp Üyesi'}
+                        {member.full_name || 'İsimsiz Üye'}
                       </p>
                       <p className="text-gray-400 text-xs truncate">
                         {member.department || member.user?.department || member.role || 'Üye'}

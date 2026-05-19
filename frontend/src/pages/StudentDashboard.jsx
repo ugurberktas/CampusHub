@@ -1,9 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 export default function StudentDashboard() {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [registeredEvents, setRegisteredEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await api.get('/events');
+        setEvents(res.data);
+      } catch (err) {
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -121,13 +139,75 @@ export default function StudentDashboard() {
 
         {/* Center Column */}
         <div className="flex-1 border border-gray-200 rounded-xl bg-white p-4">
-          <div className="flex flex-col items-center justify-center min-h-[600px] gap-3">
-            <span className="text-5xl select-none">📅</span>
-            <h3 className="text-gray-500 font-semibold text-lg">Henüz etkinlik yok</h3>
-            <p className="text-gray-400 text-sm text-center">
-              Topluluklar etkinlik oluşturdukça burada görünecek
-            </p>
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[600px] text-gray-400 text-sm">
+              Yükleniyor...
+            </div>
+          ) : events.length === 0 ? (
+            <div className="flex flex-col items-center justify-center min-h-[600px] gap-3">
+              <span className="text-5xl select-none">📅</span>
+              <h3 className="text-gray-500 font-semibold text-lg">Henüz etkinlik yok</h3>
+              <p className="text-gray-400 text-sm text-center">
+                Topluluklar etkinlik oluşturdukça burada görünecek
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              {events.map((event) => (
+                <div
+                  key={event.id}
+                  className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  {event.image_url && (
+                    <img
+                      src={event.image_url}
+                      alt={event.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
+                  <div className="p-4 flex flex-col gap-2">
+                    <h4 className="font-bold text-gray-800 text-base">
+                      {event.title}
+                    </h4>
+                    {event.description && (
+                      <p className="text-gray-600 text-sm">
+                        {event.description}
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-1 mt-1">
+                      <span className="text-gray-400 text-sm flex items-center gap-1.5">
+                        📍 {event.location || 'Konum belirtilmemiş'}
+                      </span>
+                      <span className="text-gray-400 text-sm flex items-center gap-1.5">
+                        📅 {event.event_date
+                          ? new Date(event.event_date).toLocaleDateString('tr-TR')
+                          : 'Tarih belirtilmemiş'}
+                      </span>
+                    </div>
+                    {registeredEvents.includes(event.id) ? (
+                      <button className="w-full mt-3 py-2.5 rounded-lg bg-green-500 text-white font-semibold text-sm cursor-not-allowed">
+                        ✓ Kayıtlısınız
+                      </button>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.post(`/events/${event.id}/register`);
+                            setRegisteredEvents(prev => [...prev, event.id]);
+                          } catch {
+                            alert('Zaten kayıtlısınız!');
+                          }
+                        }}
+                        className="w-full mt-3 py-2.5 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000] transition-colors focus:outline-none"
+                      >
+                        Kayıt Ol
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Column */}

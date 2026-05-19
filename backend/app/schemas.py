@@ -90,7 +90,7 @@ class ClubMemberResponse(BaseModel):
     club_id: UUID
     role: str
     permissions: Optional[dict]
-    joined_at: datetime
+    joined_at: datetime | None = None
 
 
 # ── Event Schemas ─────────────────────────────────────────────────────────────

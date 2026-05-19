@@ -8,6 +8,9 @@ from app.routers.auth import router as auth_router
 from app.routers.clubs import router as clubs_router
 from app.routers.events import router as events_router
 from app.routers.sks import router as sks_router
+from app.routers.salons import router as salons_router
+from fastapi.staticfiles import StaticFiles
+from app.routers.upload import router as upload_router
 
 app = FastAPI(title="Campus Hub API", version="0.1.0")
 
@@ -28,6 +31,9 @@ app.include_router(auth_router, prefix="/auth")
 app.include_router(clubs_router, prefix="/clubs")
 app.include_router(events_router, prefix="/events")
 app.include_router(sks_router)
+app.include_router(salons_router, prefix="")
+app.include_router(upload_router)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")
 def startup():
