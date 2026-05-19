@@ -183,8 +183,142 @@ export default function ProfilePage() {
           </div>
 
           {/* Right Column */}
-          <div className="flex-1">
-            Sağ Kolon
+          <div className="flex-1 bg-white rounded-xl border border-gray-200 overflow-hidden">
+
+            {/* Tab Headers */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('events')}
+                className={`flex-1 py-3 text-sm font-semibold
+                  ${activeTab === 'events' 
+                    ? 'text-[#800000] border-b-2 border-[#800000]' 
+                    : 'text-gray-400 hover:text-gray-600'}`}>
+                📅 Etkinliklerim ({myEvents.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('clubs')}
+                className={`flex-1 py-3 text-sm font-semibold
+                  ${activeTab === 'clubs' 
+                    ? 'text-[#800000] border-b-2 border-[#800000]' 
+                    : 'text-gray-400 hover:text-gray-600'}`}>
+                👥 Topluluklarım ({myClubs.length})
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-4">
+
+              {/* Events Tab */}
+              {activeTab === 'events' && (
+                <div className="flex flex-col gap-3">
+                  {myEvents.length === 0 ? (
+                    <div className="flex flex-col items-center 
+                      gap-2 py-12">
+                      <span className="text-4xl">📅</span>
+                      <p className="text-gray-400 text-sm">
+                        Henüz etkinliğe kayıt olmadınız
+                      </p>
+                    </div>
+                  ) : (
+                    myEvents.map(event => (
+                      <div key={event.event_id}
+                        className="flex items-center justify-between
+                        p-3 bg-gray-50 rounded-xl">
+                        <div>
+                          <p className="text-gray-800 font-semibold text-sm">
+                            {event.event_title}
+                          </p>
+                          <p className="text-gray-400 text-xs mt-0.5">
+                            📍 {event.event_location}
+                          </p>
+                          <p className="text-gray-400 text-xs">
+                            📅 {event.event_date 
+                              ? new Date(event.event_date)
+                                .toLocaleDateString('tr-TR')
+                              : '-'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm('Kayıt iptal edilsin mi?')) return;
+                            try {
+                              await api.delete(`/events/${event.event_id}/unregister`);
+                              setMyEvents(prev => 
+                                prev.filter(e => e.event_id !== event.event_id)
+                              );
+                            } catch {
+                              alert('İptal edilemedi.');
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs
+                          border border-red-200 text-red-500
+                          hover:bg-red-50 shrink-0">
+                          İptal
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Clubs Tab */}
+              {activeTab === 'clubs' && (
+                <div className="flex flex-col gap-3">
+                  {myClubs.length === 0 ? (
+                    <div className="flex flex-col items-center 
+                      gap-2 py-12">
+                      <span className="text-4xl">👥</span>
+                      <p className="text-gray-400 text-sm">
+                        Henüz bir topluluğa üye olmadınız
+                      </p>
+                    </div>
+                  ) : (
+                    myClubs.map(club => (
+                      <div key={club.club_id}
+                        className="flex items-center justify-between
+                        p-3 bg-gray-50 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full 
+                            bg-[#800000]/10 text-[#800000] 
+                            font-bold text-sm flex items-center 
+                            justify-center shrink-0">
+                            {club.club_name?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-gray-800 font-semibold text-sm">
+                              {club.club_name}
+                            </p>
+                            <p className="text-gray-400 text-xs">
+                              {club.club_category}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(
+                              `${club.club_name} topluluğundan ayrılmak istediğinize emin misiniz?`
+                            )) return;
+                            try {
+                              await api.delete(`/clubs/${club.club_id}/leave`);
+                              setMyClubs(prev => 
+                                prev.filter(c => c.club_id !== club.club_id)
+                              );
+                            } catch {
+                              alert('Ayrılınamadı.');
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs
+                          border border-red-200 text-red-500
+                          hover:bg-red-50 shrink-0">
+                          Ayrıl
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+            </div>
           </div>
         </div>
       </div>
