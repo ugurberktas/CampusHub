@@ -78,7 +78,7 @@ class ClubResponse(BaseModel):
     advisor_faculty: Optional[str] = None
     advisor_email: Optional[str] = None
     university_id: UUID
-    created_at: datetime
+    created_at: datetime | None = None
     follower_count: int = 0
 
 
@@ -117,7 +117,7 @@ class EventResponse(BaseModel):
     event_date: datetime
     status: str
     club_id: UUID
-    created_at: datetime
+    created_at: datetime | None = None
     registration_count: int = 0
 
 

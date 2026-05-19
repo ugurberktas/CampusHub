@@ -8,6 +8,17 @@ export default function StudentDashboard() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [clubs, setClubs] = useState([]);
+  const [joinedClubs, setJoinedClubs] = useState([]);
+
+  const handleJoinClub = async (clubId) => {
+    try {
+      await api.post(`/clubs/${clubId}/join`);
+      setJoinedClubs(prev => [...prev, clubId]);
+    } catch {
+      alert('Zaten bu topluluğun üyesisin!');
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -20,7 +31,16 @@ export default function StudentDashboard() {
         setLoading(false);
       }
     };
+    const fetchClubs = async () => {
+      try {
+        const clubsRes = await api.get('/clubs');
+        setClubs(clubsRes.data.slice(-5).reverse());
+      } catch (err) {
+        setClubs([]);
+      }
+    };
     fetchEvents();
+    fetchClubs();
   }, []);
 
   const getInitials = (name) => {
@@ -213,19 +233,47 @@ export default function StudentDashboard() {
         {/* Right Column */}
         <div className="w-72 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
           <div className="flex flex-col gap-3">
-            <h4 className="text-gray-500 font-semibold text-sm">Önerilen Topluluklar</h4>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
-              <div className="flex-1 h-3 rounded bg-gray-100" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
-              <div className="flex-1 h-3 rounded bg-gray-100" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
-              <div className="flex-1 h-3 rounded bg-gray-100" />
-            </div>
+            <p className="text-gray-500 font-semibold text-sm">
+              Önerilen Topluluklar
+            </p>
+            {clubs.length === 0 ? (
+              <p className="text-gray-400 text-xs">
+                Topluluk bulunamadı
+              </p>
+            ) : (
+              clubs.map(club => (
+                <div key={club.id} 
+                  className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full 
+                    bg-[#800000]/10 text-[#800000] 
+                    font-bold text-xs flex items-center 
+                    justify-center shrink-0">
+                    {club.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-gray-700 text-sm font-medium">
+                      {club.name}
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      {club.category}
+                    </p>
+                  </div>
+
+                  {joinedClubs.includes(club.id) ? (
+                    <button className="ml-auto px-2 py-1 rounded-lg text-xs bg-green-50 text-green-600 border border-green-200 shrink-0">
+                      ✓ Üye
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleJoinClub(club.id)}
+                      className="ml-auto px-2 py-1 rounded-lg text-xs border border-gray-300 text-gray-500 hover:border-[#800000] hover:text-[#800000] shrink-0"
+                    >
+                      Üye Ol
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -199,7 +199,64 @@ def add_member(
     return new_member
 
 
-@router.get("/{club_id}/members", response_model=List[ClubMemberResponse])
+@router.post("/{club_id}/join")
+def join_club(
+    club_id,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    club = _get_club_or_404(club_id, db)
+    
+    existing = db.query(ClubMember).filter(
+        ClubMember.club_id == club.id,
+        ClubMember.user_id == current_user.id
+    ).first()
+    
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Already a member of this club"
+        )
+    
+    member = ClubMember(
+        club_id=club.id,
+        user_id=current_user.id,
+        role="member"
+    )
+    db.add(member)
+    db.commit()
+    return {"message": "Successfully joined the club"}
+
+
+@router.delete("/{club_id}/leave")
+def leave_club(
+    club_id,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    membership = db.query(ClubMember).filter(
+        ClubMember.club_id == club_id,
+        ClubMember.user_id == current_user.id
+    ).first()
+    
+    if not membership:
+        raise HTTPException(
+            status_code=404,
+            detail="Bu kulübün üyesi değilsiniz"
+        )
+    
+    if membership.role == "owner":
+        raise HTTPException(
+            status_code=400,
+            detail="Kulüp sahibi ayrılamaz"
+        )
+    
+    db.delete(membership)
+    db.commit()
+    return {"message": "Kulüpten ayrıldınız"}
+
+
+@router.get("/{club_id}/members")
 def list_members(
     club_id,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -207,5 +264,23 @@ def list_members(
 ):
     """Authenticated users – list members of a club."""
     _get_club_or_404(club_id, db)
-    members = db.query(ClubMember).filter(ClubMember.club_id == club_id).all()
-    return members
+    members = (
+        db.query(ClubMember, User)
+        .join(User, User.id == ClubMember.user_id)
+        .filter(ClubMember.club_id == club_id)
+        .all()
+    )
+
+    return [
+        {
+            "id": m.id,
+            "user_id": m.user_id,
+            "club_id": m.club_id,
+            "role": m.role,
+            "joined_at": m.joined_at,
+            "full_name": u.full_name,
+            "department": u.department,
+            "grade": u.grade
+        }
+        for m, u in members
+    ]

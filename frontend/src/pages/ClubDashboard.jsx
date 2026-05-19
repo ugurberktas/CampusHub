@@ -22,6 +22,9 @@ export default function ClubDashboard() {
   });
   const [members, setMembers] = useState([]);
   const [salons, setSalons] = useState([]);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [registrationsModal, setRegistrationsModal] = useState(null);
+  const [registrations, setRegistrations] = useState([]);
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -97,6 +100,48 @@ export default function ClubDashboard() {
       setFormData(prev => ({...prev, image_url: res.data.url}));
     } catch (err) {
       alert('Fotoğraf yüklenemedi.');
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm('Etkinliği silmek istediğinize emin misiniz?')) return;
+    try {
+      await api.delete(`/events/${eventId}`);
+      setEvents(prev => prev.filter(e => e.id !== eventId));
+    } catch {
+      alert('Etkinlik silinemedi.');
+    }
+  };
+
+  const handleViewRegistrations = async (event) => {
+    try {
+      const res = await api.get(`/events/${event.id}/registrations`);
+      setRegistrations(res.data);
+      setRegistrationsModal(event);
+    } catch {
+      alert('Kayıtlar yüklenemedi.');
+    }
+  };
+
+  const handleEditEvent = async () => {
+    try {
+      await api.put(`/events/${editingEvent.id}`, {
+        title: editingEvent.title,
+        description: editingEvent.description || '',
+        location: editingEvent.location,
+        event_date: editingEvent.event_date,
+        capacity: editingEvent.capacity 
+          ? parseInt(editingEvent.capacity) : null,
+        expected_attendance_rate: 
+          editingEvent.expected_attendance_rate || 0.7,
+        club_id: club.id
+      });
+      setEvents(prev => prev.map(e => 
+        e.id === editingEvent.id ? editingEvent : e
+      ));
+      setEditingEvent(null);
+    } catch {
+      alert('Etkinlik güncellenemedi.');
     }
   };
 
@@ -434,27 +479,50 @@ export default function ClubDashboard() {
                 {events.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white rounded-xl border border-gray-200 flex flex-col shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                    className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow"
                   >
                     {event.image_url && (
                       <img src={event.image_url} 
-                        className="w-full h-40 object-cover rounded-t-xl"
+                        className="w-full h-40 object-cover"
                       />
                     )}
-                    <div className="p-4 flex items-center justify-between">
-                      <div className="min-w-0 flex flex-col gap-1">
-                        <h4 className="font-semibold text-gray-800 text-sm truncate">
-                          {event.title}
-                        </h4>
-                        <p className="text-gray-400 text-xs truncate">
+                    <div className="p-4 border-b border-gray-100">
+                      <h4 className="font-bold text-gray-800 text-base">
+                        {event.title}
+                      </h4>
+                      <div className="flex gap-2 mt-1">
+                        <span className="text-gray-400 text-sm">
                           📍 {event.location || '-'}
-                        </p>
+                        </span>
+                        <span className="text-gray-400 text-sm">
+                          📅 {event.event_date 
+                            ? new Date(event.event_date).toLocaleString('tr-TR', {
+                                day: '2-digit', month: 'long', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                              })
+                            : 'Tarih belirtilmemiş'}
+                        </span>
                       </div>
-                      <span className="text-gray-400 text-xs shrink-0 font-medium bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">
-                        📅 {event.event_date 
-                          ? new Date(event.event_date).toLocaleDateString('tr-TR')
-                          : 'Tarih belirtilmemiş'}
-                      </span>
+                    </div>
+                    <div className="p-3 flex gap-2">
+                      <button
+                        onClick={() => handleViewRegistrations(event)}
+                        className="flex-1 py-2 rounded-lg bg-[#800000] text-white text-xs font-semibold hover:bg-[#6b0000] transition-colors focus:outline-none"
+                      >
+                        Kayıt Olanları Gör
+                      </button>
+                      <button
+                        onClick={() => setEditingEvent(event)}
+                        className="px-3 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs hover:bg-gray-50 transition-colors focus:outline-none"
+                      >
+                        Düzenle
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="px-3 py-2 rounded-lg border border-red-200 text-red-500 text-xs hover:bg-red-50 transition-colors focus:outline-none"
+                      >
+                        Sil
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -492,6 +560,136 @@ export default function ClubDashboard() {
             )}
           </div>
         </div>
+
+        {registrationsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+              
+              {/* Modal Header */}
+              <div className="bg-[#800000] p-5 flex items-center justify-between">
+                <div>
+                  <h3 className="text-white font-bold text-base">
+                    Kayıt Olanlar
+                  </h3>
+                  <p className="text-white/70 text-xs mt-0.5">
+                    {registrationsModal.title}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setRegistrationsModal(null)}
+                  className="text-white/70 hover:text-white text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-4 max-h-96 overflow-y-auto">
+                {registrations.length === 0 ? (
+                  <div className="flex flex-col items-center gap-2 py-8">
+                    <span className="text-3xl">👥</span>
+                    <p className="text-gray-400 text-sm">
+                      Henüz kayıt olan yok
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {registrations.map((student, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div className="w-9 h-9 rounded-full bg-[#800000]/10 text-[#800000] font-bold text-sm flex items-center justify-center shrink-0">
+                          {student.full_name?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <p className="text-gray-800 font-semibold text-sm">
+                            {student.full_name || 'İsimsiz'}
+                          </p>
+                          <p className="text-gray-400 text-xs">
+                            {student.department || '-'} {student.grade ? `• ${student.grade}. Sınıf` : ''}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-gray-100">
+                <p className="text-gray-400 text-xs text-center">
+                  Toplam {registrations.length} kayıt
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editingEvent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+              
+              <div className="bg-[#800000] p-5 flex items-center justify-between">
+                <h3 className="text-white font-bold text-base">
+                  Etkinliği Düzenle
+                </h3>
+                <button onClick={() => setEditingEvent(null)}
+                  className="text-white/70 hover:text-white text-xl">
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-5 flex flex-col gap-3">
+                <input
+                  type="text"
+                  value={editingEvent.title}
+                  onChange={e => setEditingEvent({
+                    ...editingEvent, title: e.target.value
+                  })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000]"
+                  placeholder="Etkinlik adı"
+                />
+                <textarea
+                  value={editingEvent.description || ''}
+                  onChange={e => setEditingEvent({
+                    ...editingEvent, description: e.target.value
+                  })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000] resize-none h-20"
+                  placeholder="Açıklama"
+                />
+                <input
+                  type="text"
+                  value={editingEvent.location}
+                  onChange={e => setEditingEvent({
+                    ...editingEvent, location: e.target.value
+                  })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000]"
+                  placeholder="Konum"
+                />
+                <input
+                  type="datetime-local"
+                  value={editingEvent.event_date?.slice(0,16)}
+                  onChange={e => setEditingEvent({
+                    ...editingEvent, event_date: e.target.value
+                  })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000]"
+                />
+                <input
+                  type="number"
+                  value={editingEvent.capacity || ''}
+                  onChange={e => setEditingEvent({
+                    ...editingEvent, capacity: e.target.value
+                  })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#800000]"
+                  placeholder="Kontenjan (opsiyonel)"
+                />
+                <button
+                  onClick={handleEditEvent}
+                  className="w-full py-2.5 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000]">
+                  Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
