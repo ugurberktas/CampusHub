@@ -92,6 +92,7 @@ Bu dosya **Campus Hub** projesinin güncel durumunu, mimarisini ve yapılacaklar
 61. **Öğrenci Profili API Entegrasyonu (`backend/app/routers/auth.py`):** Öğrencilerin kendi katıldıkları toplulukları listelemek için `GET /auth/me/clubs` ve kayıtlı oldukları etkinlikleri listelemek için `GET /auth/me/events` endpoint'leri auth router'ına eklendi; gerekli model ve `Annotated` tip tanımları import edildi ✔
 62. **Topluluktan Ayrılma API Entegrasyonu (`backend/app/routers/clubs.py`):** Öğrencilerin katıldıkları topluluklardan ayrılabilmeleri için `DELETE /clubs/{club_id}/leave` endpoint'i (`leave_club`) sisteme eklendi; kulüp sahiplerinin kulüpten ayrılması engellendi ✔
 63. **Etkinlik Kaydı İptali API Entegrasyonu (`backend/app/routers/events.py`):** Öğrencilerin kaydoldukları etkinliklerden kayıtlarını iptal edebilmeleri için `DELETE /events/{event_id}/unregister` endpoint'i (`unregister_from_event`) sisteme eklendi ✔
+64. **Öğrenci Profil Sayfası Şablonu (`frontend/src/pages/ProfilePage.jsx`):** Öğrencilerin katıldıkları toplulukları ve etkinlikleri görüntüleyebilecekleri profil sayfasının (`ProfilePage.jsx`) iskeleti, yönlendirme butonu ve `GET /auth/me/events`, `GET /auth/me/clubs` API istekleriyle birlikte oluşturuldu ✔
 
 ---
 
