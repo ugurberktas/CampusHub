@@ -209,25 +209,49 @@ export default function StudentDashboard() {
                           : 'Tarih belirtilmemiş'}
                       </span>
                     </div>
-                    {registeredEvents.includes(event.id) ? (
-                      <button className="w-full mt-3 py-2.5 rounded-lg bg-green-500 text-white font-semibold text-sm cursor-not-allowed">
-                        ✓ Kayıtlısınız
-                      </button>
-                    ) : (
-                      <button
-                        onClick={async () => {
-                          try {
-                            await api.post(`/events/${event.id}/register`);
-                            setRegisteredEvents(prev => [...prev, event.id]);
-                          } catch {
-                            alert('Zaten kayıtlısınız!');
-                          }
-                        }}
-                        className="w-full mt-3 py-2.5 rounded-lg bg-[#800000] text-white font-semibold text-sm hover:bg-[#6b0000] transition-colors focus:outline-none"
-                      >
-                        Kayıt Ol
-                      </button>
-                    )}
+                    {(() => {
+                      const isFull = event.capacity !== null && 
+                        event.registration_count >= event.capacity;
+                      const isRegistered = registeredEvents.includes(event.id);
+
+                      if (isRegistered) {
+                        return (
+                          <button className="w-full mt-3 py-2.5 rounded-lg 
+                            bg-green-500 text-white font-semibold text-sm
+                            cursor-not-allowed">
+                            ✓ Kayıtlısınız
+                          </button>
+                        );
+                      }
+
+                      if (isFull) {
+                        return (
+                          <button disabled
+                            className="w-full mt-3 py-2.5 rounded-lg 
+                            bg-gray-200 text-gray-400 font-semibold text-sm
+                            cursor-not-allowed">
+                            Kontenjan Doldu
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.post(`/events/${event.id}/register`);
+                              setRegisteredEvents(prev => [...prev, event.id]);
+                            } catch {
+                              alert('Zaten kayıtlısınız!');
+                            }
+                          }}
+                          className="w-full mt-3 py-2.5 rounded-lg 
+                          bg-[#800000] text-white font-semibold text-sm 
+                          hover:bg-[#6b0000]">
+                          Kayıt Ol
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               ))}
