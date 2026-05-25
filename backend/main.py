@@ -11,6 +11,7 @@ from app.routers.sks import router as sks_router
 from app.routers.salons import router as salons_router
 from fastapi.staticfiles import StaticFiles
 from app.routers.upload import router as upload_router
+from app.routers.announcements import router as announcements_router
 
 app = FastAPI(title="Campus Hub API", version="0.1.0")
 
@@ -33,6 +34,7 @@ app.include_router(events_router, prefix="/events")
 app.include_router(sks_router)
 app.include_router(salons_router, prefix="")
 app.include_router(upload_router)
+app.include_router(announcements_router, prefix="/announcements")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")

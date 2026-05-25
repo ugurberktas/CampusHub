@@ -12,6 +12,8 @@ export default function StudentDashboard() {
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [clubs, setClubs] = useState([]);
   const [joinedClubs, setJoinedClubs] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [showAllAnn, setShowAllAnn] = useState(false);
 
   const handleJoinClub = async (clubId) => {
     try {
@@ -41,8 +43,17 @@ export default function StudentDashboard() {
         setClubs([]);
       }
     };
+    const fetchAnnouncements = async () => {
+      try {
+        const annRes = await api.get('/announcements?target=student');
+        setAnnouncements(annRes.data);
+      } catch (err) {
+        setAnnouncements([]);
+      }
+    };
     fetchEvents();
     fetchClubs();
+    fetchAnnouncements();
   }, []);
 
   const getInitials = (name) => {
@@ -178,6 +189,38 @@ export default function StudentDashboard() {
             </div>
           ) : (
             <div className="flex flex-col">
+              {/* Announcements Banner */}
+              {announcements.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex flex-col gap-2">
+                    {(showAllAnn ? announcements : announcements.slice(0, 2)).map((ann, index) => (
+                      <div
+                        key={ann.id}
+                        className={`bg-red-50 border-l-4 border-[#800000] rounded-xl p-4 transition-opacity ${
+                          !showAllAnn && index === 1 && announcements.length > 2 ? 'opacity-40' : 'opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold text-[#800000] bg-red-100 px-2 py-0.5 rounded-full">
+                            📌 SKS Duyurusu
+                          </span>
+                        </div>
+                        <p className="text-gray-800 font-semibold text-sm">{ann.title}</p>
+                        <p className="text-gray-600 text-xs mt-1">{ann.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {announcements.length > 2 && (
+                    <button
+                      onClick={() => setShowAllAnn(!showAllAnn)}
+                      className="mt-2 text-xs text-[#800000] hover:underline w-full text-center"
+                    >
+                      {showAllAnn ? '▲ Daha az göster' : `▼ Tümünü gör (${announcements.length} duyuru)`}
+                    </button>
+                  )}
+                </div>
+              )}
+
               {events.map((event) => (
                 <div
                   key={event.id}

@@ -10,6 +10,12 @@ export default function SksPanel() {
   const [activeClubs, setActiveClubs] = useState([]);
   const [students, setStudents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [annForm, setAnnForm] = useState({
+    title: '',
+    content: '',
+    target_audience: 'all'
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -64,11 +70,22 @@ export default function SksPanel() {
       }
     };
 
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await api.get('/announcements');
+        setAnnouncements(res.data);
+      } catch (err) {
+        console.error('Duyurular yüklenirken hata oluştu:', err);
+        setAnnouncements([]);
+      }
+    };
+
     fetchStats();
     fetchPendingClubs();
     fetchActiveClubs();
     fetchStudents();
     fetchEvents();
+    fetchAnnouncements();
   }, []);
 
   const menuItems = [
@@ -77,6 +94,7 @@ export default function SksPanel() {
     { key: 'clubs', label: 'Aktif Topluluklar', icon: '🏢' },
     { key: 'students', label: 'Öğrenci Veritabanı', icon: '👥' },
     { key: 'events', label: 'Etkinlik Radarı', icon: '📅' },
+    { key: 'announcements', label: 'Duyurular', icon: '📢' },
   ];
 
   const renderContent = () => {
@@ -391,6 +409,97 @@ export default function SksPanel() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        );
+      case 'announcements':
+        return (
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-6">Duyurular</h2>
+
+            {/* Form Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+              <input
+                type="text"
+                placeholder="Duyuru başlığı"
+                value={annForm.title}
+                onChange={(e) => setAnnForm({ ...annForm, title: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#800000] mb-3"
+              />
+              <textarea
+                placeholder="Duyuru içeriği"
+                value={annForm.content}
+                onChange={(e) => setAnnForm({ ...annForm, content: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#800000] mb-3 h-24 resize-none"
+              />
+              <select
+                value={annForm.target_audience}
+                onChange={(e) => setAnnForm({ ...annForm, target_audience: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#800000] mb-3"
+              >
+                <option value="all">Herkese</option>
+                <option value="student">Sadece Öğrenciler</option>
+                <option value="club_owner">Sadece Topluluklar</option>
+              </select>
+              <button
+                onClick={async () => {
+                  try {
+                    await api.post('/announcements', annForm);
+                    const res = await api.get('/announcements');
+                    setAnnouncements(res.data);
+                    setAnnForm({ title: '', content: '', target_audience: 'all' });
+                  } catch (err) {
+                    console.error('Duyuru gönderilirken hata oluştu:', err);
+                  }
+                }}
+                className="w-full bg-[#800000] text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-[#600000] transition-colors focus:outline-none"
+              >
+                Gönder
+              </button>
+            </div>
+
+            {/* Announcements List */}
+            {announcements.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <span className="text-5xl select-none">📢</span>
+                <p className="text-gray-400 text-sm">Henüz duyuru yok</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {announcements.map((ann) => (
+                  <div
+                    key={ann.id}
+                    className="bg-white rounded-xl border border-gray-200 p-4 flex justify-between items-start"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-800 text-base mb-1">
+                        {ann.title}
+                      </h4>
+                      <p className="text-sm text-gray-500 mb-2">{ann.content}</p>
+                      <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                        {ann.target_audience === 'all'
+                          ? 'Herkese'
+                          : ann.target_audience === 'student'
+                          ? 'Öğrenciler'
+                          : 'Topluluklar'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await api.delete(`/announcements/${ann.id}`);
+                          setAnnouncements(announcements.filter((a) => a.id !== ann.id));
+                        } catch (err) {
+                          console.error('Duyuru silinirken hata oluştu:', err);
+                        }
+                      }}
+                      className="ml-4 px-4 py-2 border border-red-500 text-red-500 rounded-lg text-sm hover:bg-red-50 transition-colors focus:outline-none shrink-0"
+                    >
+                      Sil
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
