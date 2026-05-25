@@ -25,6 +25,8 @@ export default function ClubDashboard() {
   const [editingEvent, setEditingEvent] = useState(null);
   const [registrationsModal, setRegistrationsModal] = useState(null);
   const [registrations, setRegistrations] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [showAllAnn, setShowAllAnn] = useState(false);
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -77,6 +79,9 @@ export default function ClubDashboard() {
 
         const salonsRes = await api.get('/salons');
         setSalons(salonsRes.data);
+
+        const annRes = await api.get('/announcements?target=club_owner');
+        setAnnouncements(annRes.data);
       } catch (err) {
         console.error('Etkinlikler yüklenirken hata oluştu:', err);
         setEvents([]);
@@ -328,6 +333,38 @@ export default function ClubDashboard() {
 
           {/* Center Column */}
           <div className="flex-1 flex flex-col gap-4">
+            {/* Announcements Banner */}
+            {announcements.length > 0 && (
+              <div className="mb-4">
+                <div className="flex flex-col gap-2">
+                  {(showAllAnn ? announcements : announcements.slice(0, 2)).map((ann, index) => (
+                    <div
+                      key={ann.id}
+                      className={`bg-red-50 border-l-4 border-[#800000] rounded-xl p-4 transition-opacity ${
+                        !showAllAnn && index === 1 && announcements.length > 2 ? 'opacity-40' : 'opacity-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-[#800000] bg-red-100 px-2 py-0.5 rounded-full">
+                          📌 SKS Duyurusu
+                        </span>
+                      </div>
+                      <p className="text-gray-800 font-semibold text-sm">{ann.title}</p>
+                      <p className="text-gray-600 text-xs mt-1">{ann.content}</p>
+                    </div>
+                  ))}
+                </div>
+                {announcements.length > 2 && (
+                  <button
+                    onClick={() => setShowAllAnn(!showAllAnn)}
+                    className="mt-2 text-xs text-[#800000] hover:underline w-full text-center"
+                  >
+                    {showAllAnn ? '▲ Daha az göster' : `▼ Tümünü gör (${announcements.length} duyuru)`}
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Create Event Button / Form Toggle */}
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               {!showForm ? (
