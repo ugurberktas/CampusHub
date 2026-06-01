@@ -1,13 +1,18 @@
 from typing import Annotated, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import EmailStr
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user, require_role
 from app.database import get_db
 from app.models import Club, ClubMember, Follow, User
 from app.schemas import ClubCreate, ClubMemberResponse, ClubResponse
+
+class ClubUpdateBody(BaseModel):
+    description: Optional[str] = None
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
 
 router = APIRouter(tags=["clubs"])
 
@@ -284,3 +289,36 @@ def list_members(
         }
         for m, u in members
     ]
+
+
+@router.put("/{club_id}")
+def update_club(
+    club_id,
+    body: ClubUpdateBody,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    club = _get_club_or_404(club_id, db)
+    
+    membership = db.query(ClubMember).filter(
+        ClubMember.club_id == club.id,
+        ClubMember.user_id == current_user.id,
+        ClubMember.role == "owner"
+    ).first()
+    
+    if not membership:
+        raise HTTPException(
+            status_code=403,
+            detail="Sadece kulüp sahibi düzenleyebilir"
+        )
+    
+    if body.description is not None:
+        club.description = body.description
+    if body.logo_url is not None:
+        club.logo_url = body.logo_url
+    if body.banner_url is not None:
+        club.banner_url = body.banner_url
+    
+    db.commit()
+    db.refresh(club)
+    return _club_to_response(club, db)

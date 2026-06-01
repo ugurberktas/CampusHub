@@ -148,3 +148,23 @@ def get_my_events(
         }
         for reg, event in registrations
     ]
+
+
+@router.put("/me/password")
+def change_password(
+    body: dict,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)]
+):
+    old_password = body.get("old_password")
+    new_password = body.get("new_password")
+
+    if not verify_password(old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=400,
+            detail="Mevcut şifre yanlış"
+        )
+
+    current_user.hashed_password = get_password_hash(new_password)
+    db.commit()
+    return {"message": "Şifre güncellendi"}

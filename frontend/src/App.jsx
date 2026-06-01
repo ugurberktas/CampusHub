@@ -13,6 +13,7 @@ import SksPanel from './pages/SksPanel';
 import StudentDashboard from './pages/StudentDashboard';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import ClubSettingsPage from './pages/ClubSettingsPage';
 
 const getDashboardRoute = (role) => {
   switch (role) {
@@ -100,6 +101,12 @@ function App() {
         <Route path="/settings" element={
           <PrivateRoute allowedRole="student">
             <SettingsPage />
+          </PrivateRoute>
+        } />
+
+        <Route path="/club-settings" element={
+          <PrivateRoute allowedRole="club_owner">
+            <ClubSettingsPage />
           </PrivateRoute>
         } />
         

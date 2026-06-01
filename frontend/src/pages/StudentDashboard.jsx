@@ -192,7 +192,7 @@ export default function StudentDashboard() {
 
           {/* BOTTOM SECTION */}
           <div className="bg-white rounded-b-xl px-4 pb-4 border-x border-b border-gray-200">
-            <button onClick={() => navigate('/profile')} className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
+            <button onClick={() => navigate('/settings')} className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
               Profilimi Düzenle
             </button>
           </div>

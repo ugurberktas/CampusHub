@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function ClubDashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -27,6 +29,14 @@ export default function ClubDashboard() {
   const [registrations, setRegistrations] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [showAllAnn, setShowAllAnn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredEvents = events.filter(event =>
+    event.title?.toLowerCase()
+      .includes(searchQuery.toLowerCase()) ||
+    event.location?.toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchClub = async () => {
@@ -233,6 +243,8 @@ export default function ClubDashboard() {
           <input
             type="text"
             placeholder="Etkinlik veya topluluk ara..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-white/20 text-white placeholder-white/70 rounded-full px-4 py-1.5 w-64 outline-none text-sm"
           />
 
@@ -264,7 +276,7 @@ export default function ClubDashboard() {
                     <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
                       👤 Kulüp Profili
                     </button>
-                    <button className="w-full text-left px-3 py-2 text-sm text-gray-400 rounded-lg cursor-not-allowed opacity-50" disabled>
+                    <button onClick={() => { setDropdownOpen(false); navigate('/club-settings'); }} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
                       ⚙️ Ayarlar
                     </button>
                   </div>
@@ -290,9 +302,17 @@ export default function ClubDashboard() {
           <div className="w-64 shrink-0 sticky top-16 h-fit flex flex-col">
             {/* Top: Club Avatar + Name */}
             <div className="bg-[#800000] rounded-t-xl p-5 flex flex-col items-center gap-2">
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold select-none">
-                {club.name.charAt(0).toUpperCase()}
-              </div>
+              {club.logo_url ? (
+                <img 
+                  src={club.logo_url} 
+                  alt={club.name}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold select-none">
+                  {club.name.charAt(0).toUpperCase()}
+                </div>
+              )}
               <p className="text-white font-semibold text-sm text-center truncate w-full">
                 {club.name}
               </p>
@@ -306,7 +326,7 @@ export default function ClubDashboard() {
               <div className="flex items-center gap-2">
                 <span className="text-sm">👥</span>
                 <span className="text-gray-600 text-sm">
-                  {club.member_count || 0} Üye
+                  {members.length} Üye
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -325,7 +345,7 @@ export default function ClubDashboard() {
 
             {/* Bottom: Edit Button */}
             <div className="bg-white rounded-b-xl px-4 pb-4 border-x border-b border-gray-200">
-              <button className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
+              <button onClick={() => navigate('/club-settings')} className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
                 Kulübü Düzenle
               </button>
             </div>
@@ -501,6 +521,14 @@ export default function ClubDashboard() {
             </div>
 
             {/* Events List */}
+            {searchQuery && filteredEvents.length === 0 && (
+              <div className="flex flex-col items-center gap-2 py-8">
+                <span className="text-3xl">🔍</span>
+                <p className="text-gray-400 text-sm">
+                  "{searchQuery}" için sonuç bulunamadı
+                </p>
+              </div>
+            )}
             {events.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center gap-3 animate-fade-in">
                 <span className="text-4xl select-none">📅</span>
@@ -513,7 +541,7 @@ export default function ClubDashboard() {
               </div>
             ) : (
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100 flex flex-col">
-                {events.map((event) => (
+                {filteredEvents.map((event) => (
                   <div
                     key={event.id}
                     className="flex flex-row items-center justify-between p-4 hover:bg-gray-50/50 transition-colors gap-4"
