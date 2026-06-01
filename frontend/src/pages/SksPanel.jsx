@@ -16,6 +16,7 @@ export default function SksPanel() {
     content: '',
     target_audience: 'all'
   });
+  const [salonReservations, setSalonReservations] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -80,12 +81,23 @@ export default function SksPanel() {
       }
     };
 
+    const fetchSalonReservations = async () => {
+      try {
+        const salonsRes = await api.get('/salon_reservations');
+        setSalonReservations(salonsRes.data);
+      } catch (err) {
+        console.error('Salon rezervasyonları yüklenirken hata oluştu:', err);
+        setSalonReservations([]);
+      }
+    };
+
     fetchStats();
     fetchPendingClubs();
     fetchActiveClubs();
     fetchStudents();
     fetchEvents();
     fetchAnnouncements();
+    fetchSalonReservations();
   }, []);
 
   const menuItems = [
@@ -94,6 +106,7 @@ export default function SksPanel() {
     { key: 'clubs', label: 'Aktif Topluluklar', icon: '🏢' },
     { key: 'students', label: 'Öğrenci Veritabanı', icon: '👥' },
     { key: 'events', label: 'Etkinlik Radarı', icon: '📅' },
+    { key: 'salons', label: 'Salon Rezervasyonları', icon: '🏛️' },
     { key: 'announcements', label: 'Duyurular', icon: '📢' },
   ];
 
@@ -404,6 +417,60 @@ export default function SksPanel() {
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
                           {event.capacity ? `${event.capacity} kişi` : 'Sınırsız'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      case 'salons':
+        return (
+          <div className="w-full flex flex-col justify-start">
+            <h2 className="font-bold text-gray-800 text-xl mb-6">
+              Salon Rezervasyonları
+            </h2>
+
+            {salonReservations.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-12">
+                <span className="text-4xl">🏛️</span>
+                <p className="text-gray-400 text-sm">
+                  Henüz rezervasyon yok
+                </p>
+              </div>
+            ) : (
+              <div className="w-full bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <table className="w-full bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">Salon</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">Kulüp</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">Tarih</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">Saat</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500">Durum</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {salonReservations.map(r => (
+                      <tr key={r.id} className="hover:bg-gray-50 border-b border-gray-100">
+                        <td className="px-4 py-3 text-sm text-gray-800 font-medium">
+                          {r.salon_name}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {r.club_name}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {r.reservation_date}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {r.time_slot}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                            {r.status}
+                          </span>
                         </td>
                       </tr>
                     ))}

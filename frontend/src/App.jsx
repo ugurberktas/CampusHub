@@ -14,6 +14,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import ClubSettingsPage from './pages/ClubSettingsPage';
+import ClubProfilePage from './pages/ClubProfilePage';
 
 const getDashboardRoute = (role) => {
   switch (role) {
@@ -107,6 +108,12 @@ function App() {
         <Route path="/club-settings" element={
           <PrivateRoute allowedRole="club_owner">
             <ClubSettingsPage />
+          </PrivateRoute>
+        } />
+
+        <Route path="/club-profile" element={
+          <PrivateRoute allowedRole="club_owner">
+            <ClubProfilePage />
           </PrivateRoute>
         } />
         

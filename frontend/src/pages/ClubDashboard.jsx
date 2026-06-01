@@ -177,12 +177,22 @@ export default function ClubDashboard() {
       });
 
       if (formData.salon_id) {
-        await api.post('/salon_reservations', {
-          salon_id: formData.salon_id,
-          club_id: club.id,
-          reservation_date: formData.start_time.split('T')[0],
-          time_slot: formData.start_time.split('T')[1]
-        });
+        try {
+          await api.post('/salon_reservations', {
+            salon_id: formData.salon_id,
+            club_id: club.id,
+            reservation_date: formData.start_time.split('T')[0],
+            time_slot: formData.end_time 
+              ? `${formData.start_time.split('T')[1]} - ${formData.end_time.split('T')[1]}`
+              : formData.start_time.split('T')[1]
+          });
+        } catch (err) {
+          if (err.response?.status === 409) {
+            alert('⚠️ ' + err.response.data.detail);
+            return;
+          }
+          throw err;
+        }
       }
 
       setShowForm(false);
@@ -273,7 +283,7 @@ export default function ClubDashboard() {
 
                   {/* Section 2: Links */}
                   <div className="p-1">
-                    <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+                    <button onClick={() => { setDropdownOpen(false); navigate('/club-profile'); }} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
                       👤 Kulüp Profili
                     </button>
                     <button onClick={() => { setDropdownOpen(false); navigate('/club-settings'); }} className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
@@ -332,7 +342,7 @@ export default function ClubDashboard() {
               <div className="flex items-center gap-2">
                 <span className="text-sm">📅</span>
                 <span className="text-gray-600 text-sm">
-                  {club.event_count || 0} Etkinlik
+                  {events.length} Etkinlik
                 </span>
               </div>
               <div className="flex items-center gap-2">

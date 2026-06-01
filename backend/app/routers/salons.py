@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, date
 from ..database import get_db
-from ..models import Salon, SalonReservation
-from ..auth import get_current_user
+from ..models import Salon, SalonReservation, Club
+from ..auth import get_current_user, require_role
 from pydantic import BaseModel
 from uuid import UUID
 
@@ -49,14 +49,13 @@ def create_reservation(
     # Check for overlapping reservations
     conflict = db.query(SalonReservation).filter(
         SalonReservation.salon_id == body.salon_id,
-        SalonReservation.reservation_date == body.reservation_date,
-        SalonReservation.time_slot == body.time_slot
+        SalonReservation.reservation_date == body.reservation_date
     ).first()
     
     if conflict:
         raise HTTPException(
-            status_code=400, 
-            detail="Bu salon bu saatte dolu"
+            status_code=409,
+            detail="Seçtiğiniz salon bu tarih ve saatte doludur, lütfen başka bir zaman seçin."
         )
     
     reservation = SalonReservation(
@@ -69,3 +68,28 @@ def create_reservation(
     db.commit()
     db.refresh(reservation)
     return reservation
+
+
+@router.get("/salon_reservations")
+def get_all_reservations(
+    current_user = Depends(require_role("sks_staff")),
+    db: Session = Depends(get_db)
+):
+    reservations = db.query(SalonReservation).all()
+    result = []
+    for r in reservations:
+        salon = db.query(Salon).filter(
+            Salon.id == r.salon_id
+        ).first()
+        club = db.query(Club).filter(
+            Club.id == r.club_id
+        ).first()
+        result.append({
+            "id": str(r.id),
+            "salon_name": salon.name if salon else "-",
+            "club_name": club.name if club else "-",
+            "reservation_date": str(r.reservation_date),
+            "time_slot": r.time_slot or "-",
+            "status": r.status or "active"
+        })
+    return result

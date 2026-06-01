@@ -67,6 +67,21 @@ export default function ClubSettingsPage() {
     }
   }, [user]);
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await api.post('/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setLogoUrl(res.data.url);
+    } catch {
+      alert('Logo yüklenemedi.');
+    }
+  };
+
   const handleSaveClub = async () => {
     if (!club) return;
     try {
@@ -343,13 +358,25 @@ export default function ClubSettingsPage() {
                       <label className="text-xs text-gray-400 font-medium mb-1 block">
                         Logo URL
                       </label>
-                      <input
-                        type="text"
-                        value={logoUrl}
-                        onChange={(e) => setLogoUrl(e.target.value)}
-                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-gray-700 text-sm outline-none focus:border-[#800000]"
-                        placeholder="https://..."
-                      />
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          onChange={handleLogoUpload}
+                          className="w-full border border-gray-200 rounded-lg 
+                          px-3 py-2 text-sm text-gray-600
+                          file:mr-3 file:py-1 file:px-3 file:rounded-lg 
+                          file:border-0 file:bg-[#800000] file:text-white 
+                          file:text-xs file:cursor-pointer cursor-pointer"
+                        />
+                        {logoUrl && (
+                          <img 
+                            src={logoUrl}
+                            alt="Logo önizleme"
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                        )}
+                      </div>
                     </div>
 
                     <div>
