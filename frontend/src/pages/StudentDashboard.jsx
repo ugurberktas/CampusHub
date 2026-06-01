@@ -139,7 +139,10 @@ export default function StudentDashboard() {
                 >
                   <span>👤</span> Profilim
                 </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2 cursor-not-allowed opacity-50" disabled>
+                <button
+                  onClick={() => { setDropdownOpen(false); navigate('/settings'); }}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+                >
                   <span>⚙️</span> Ayarlar
                 </button>
               </div>
