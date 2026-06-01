@@ -478,6 +478,7 @@ export default function ClubDashboard() {
                       <input
                         type="datetime-local"
                         value={formData.start_time}
+                        min={new Date().toISOString().slice(0, 16)}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
@@ -492,6 +493,7 @@ export default function ClubDashboard() {
                       <input
                         type="datetime-local"
                         value={formData.end_time}
+                        min={new Date().toISOString().slice(0, 16)}
                         onChange={(e) =>
                           setFormData({ ...formData, end_time: e.target.value })
                         }
@@ -627,7 +629,7 @@ export default function ClubDashboard() {
                       {member.full_name?.charAt(0) || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-gray-700 text-sm font-medium truncate">
+                      <p className="text-gray-700 text-sm font-medium truncate max-w-[120px]">
                         {member.full_name || 'İsimsiz Üye'}
                       </p>
                       <p className="text-gray-400 text-xs truncate">
@@ -747,6 +749,7 @@ export default function ClubDashboard() {
                 <input
                   type="datetime-local"
                   value={editingEvent.event_date?.slice(0,16)}
+                  min={new Date().toISOString().slice(0, 16)}
                   onChange={e => setEditingEvent({
                     ...editingEvent, event_date: e.target.value
                   })}
