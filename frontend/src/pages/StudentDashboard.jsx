@@ -29,6 +29,9 @@ export default function StudentDashboard() {
       try {
         const res = await api.get('/events');
         setEvents(res.data);
+        const myEventsRes = await api.get('/auth/me/events');
+        const myEventIds = myEventsRes.data.map(e => e.event_id);
+        setRegisteredEvents(myEventIds);
       } catch (err) {
         setEvents([]);
       } finally {
@@ -39,6 +42,9 @@ export default function StudentDashboard() {
       try {
         const clubsRes = await api.get('/clubs');
         setClubs(clubsRes.data.slice(-5).reverse());
+        const myClubsRes = await api.get('/auth/me/clubs');
+        const myClubIds = myClubsRes.data.map(c => c.club_id);
+        setJoinedClubs(myClubIds);
       } catch (err) {
         setClubs([]);
       }
@@ -84,7 +90,7 @@ export default function StudentDashboard() {
           <input
             type="text"
             placeholder="Etkinlik veya topluluk ara..."
-            className="bg-white/20 text-white placeholder-white/70 rounded-full px-4 py-1.5 w-64 outline-none text-sm"
+            className="bg-white/20 text-white placeholder-white/70 rounded-full px-4 py-1.5 w-2/5 outline-none text-sm"
           />
         </div>
 
@@ -141,9 +147,10 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main 3-Column Layout Container */}
-      <div className="flex flex-row gap-6 px-6 py-4 w-full flex-1">
+      <div className="max-w-screen-xl mx-auto px-6 py-4 w-full">
+        <div className="grid grid-cols-12 gap-6 w-full">
         {/* Left Column */}
-        <div className="w-64 shrink-0 sticky top-16 h-fit flex flex-col">
+        <div className="col-span-3 sticky top-16 h-fit flex flex-col">
           {/* TOP SECTION */}
           <div className="bg-[#800000] rounded-t-xl p-5 flex flex-col items-center gap-2">
             <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold select-none">
@@ -167,14 +174,14 @@ export default function StudentDashboard() {
 
           {/* BOTTOM SECTION */}
           <div className="bg-white rounded-b-xl px-4 pb-4 border-x border-b border-gray-200">
-            <button className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
+            <button onClick={() => navigate('/profile')} className="w-full py-2 rounded-lg text-sm text-gray-500 border border-gray-300 hover:border-gray-400 hover:text-gray-700 transition-colors focus:outline-none">
               Profilimi Düzenle
             </button>
           </div>
         </div>
 
         {/* Center Column */}
-        <div className="flex-1 border border-gray-200 rounded-xl bg-white p-4">
+        <div className="col-span-6 border border-gray-200 rounded-xl bg-white p-4">
           {loading ? (
             <div className="flex items-center justify-center min-h-[600px] text-gray-400 text-sm">
               Yükleniyor...
@@ -252,10 +259,10 @@ export default function StudentDashboard() {
                   {/* Card Image: edge-to-edge */}
                   {event.image_url ? (
                     <img src={event.image_url}
-                      className="w-full h-56 object-cover"
+                      className="w-full h-64 object-cover"
                       alt={event.title} />
                   ) : (
-                    <div className="w-full h-56 bg-gradient-to-br 
+                    <div className="w-full h-64 bg-gradient-to-br 
                       from-rose-900 to-gray-900 flex flex-col 
                       items-center justify-center gap-2">
                       <div className="text-white/20 text-6xl font-black">
@@ -352,7 +359,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Right Column */}
-        <div className="w-72 shrink-0 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
+        <div className="col-span-3 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
           <div className="flex flex-col gap-3">
             <p className="text-gray-500 font-semibold text-sm">
               Önerilen Topluluklar
@@ -396,6 +403,7 @@ export default function StudentDashboard() {
               ))
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>
