@@ -147,10 +147,10 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main 3-Column Layout Container */}
-      <div className="max-w-screen-xl mx-auto px-6 py-4 w-full">
-        <div className="grid grid-cols-12 gap-6 w-full">
+      <div className="w-full max-w-[1700px] mx-auto px-8 py-8">
+        <div className="flex flex-row justify-between items-start gap-8">
         {/* Left Column */}
-        <div className="col-span-3 sticky top-16 h-fit flex flex-col">
+        <div className="w-[300px] shrink-0 sticky top-16 h-fit flex flex-col">
           {/* TOP SECTION */}
           <div className="bg-[#800000] rounded-t-xl p-5 flex flex-col items-center gap-2">
             <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold select-none">
@@ -181,7 +181,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Center Column */}
-        <div className="col-span-6 border border-gray-200 rounded-xl bg-white p-4">
+        <div className="flex-1 max-w-[900px] w-full mx-auto border border-gray-200 rounded-xl bg-white p-4">
           {loading ? (
             <div className="flex items-center justify-center min-h-[600px] text-gray-400 text-sm">
               Yükleniyor...
@@ -359,7 +359,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Right Column */}
-        <div className="col-span-3 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
+        <div className="w-[350px] shrink-0 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
           <div className="flex flex-col gap-3">
             <p className="text-gray-500 font-semibold text-sm">
               Önerilen Topluluklar
