@@ -14,6 +14,7 @@ export default function StudentDashboard() {
   const [joinedClubs, setJoinedClubs] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [showAllAnn, setShowAllAnn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleJoinClub = async (clubId) => {
     try {
@@ -68,6 +69,18 @@ export default function StudentDashboard() {
     return parts.slice(0, 2).map(p => p[0]).join('').toUpperCase();
   };
 
+  const filteredEvents = events.filter(event =>
+    event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    event.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    clubs.find(c => c.id === event.club_id)?.name
+      ?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredClubs = clubs.filter(club =>
+    club.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    club.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
       {/* Click outside to close dropdown */}
@@ -90,6 +103,8 @@ export default function StudentDashboard() {
           <input
             type="text"
             placeholder="Etkinlik veya topluluk ara..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-white/20 text-white placeholder-white/70 rounded-full px-4 py-1.5 w-2/5 outline-none text-sm"
           />
         </div>
@@ -228,7 +243,7 @@ export default function StudentDashboard() {
                 </div>
               )}
 
-              {events.map((event) => (
+              {filteredEvents.map((event) => (
                 <div
                   key={event.id}
                   className="bg-white rounded-2xl border border-gray-200 
@@ -369,7 +384,7 @@ export default function StudentDashboard() {
                 Topluluk bulunamadı
               </p>
             ) : (
-              clubs.map(club => (
+              filteredClubs.map(club => (
                 <div key={club.id} 
                   className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full 
