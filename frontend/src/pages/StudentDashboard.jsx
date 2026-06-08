@@ -15,6 +15,45 @@ export default function StudentDashboard() {
   const [announcements, setAnnouncements] = useState([]);
   const [showAllAnn, setShowAllAnn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiRecommendation, setAiRecommendation] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const getAIRecommendation = async () => {
+    setAiLoading(true);
+    setAiRecommendation('');
+    try {
+      const eventList = events.slice(0, 10).map(e =>
+        `${e.title} (${clubs.find(c => c.id === e.club_id)?.name || 'Topluluk'})`
+      ).join(', ');
+
+      const prompt = `Sen Fırat Üniversitesi kampüs asistanısın. 
+    Öğrencinin bölümü: ${user?.department || 'Belirtilmemiş'}
+    Öğrencinin sınıfı: ${user?.grade || 'Belirtilmemiş'}. sınıf
+    Mevcut etkinlikler: ${eventList}
+    
+    Bu öğrenciye özellikle hangi etkinliğe katılmasını 
+    tavsiye edersin? 2-3 cümle ile kişisel ve samimi 
+    bir öneri yaz. Türkçe yaz.`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        }
+      );
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      setAiRecommendation(text || 'Öneri alınamadı.');
+    } catch (err) {
+      setAiRecommendation('Bir hata oluştu, tekrar deneyin.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleJoinClub = async (clubId) => {
     try {
@@ -379,6 +418,43 @@ export default function StudentDashboard() {
         {/* Right Column */}
         <div className="w-[300px] shrink-0 sticky top-16 h-fit border border-gray-200 rounded-xl bg-white p-4">
           <div className="flex flex-col gap-3">
+            {/* AI Recommendation Card */}
+            <div className="bg-gradient-to-br from-rose-900 to-gray-900 rounded-xl p-4 mb-4">
+              <p className="text-white font-semibold text-sm mb-1">
+                ✨ AI Etkinlik Önerisi
+              </p>
+              <p className="text-white/60 text-xs mb-3">
+                Bölümüne ve ilgi alanlarına göre
+              </p>
+
+              {!aiRecommendation && !aiLoading && (
+                <button
+                  onClick={getAIRecommendation}
+                  className="w-full py-2 rounded-lg bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition-colors">
+                  Öneri Al →
+                </button>
+              )}
+
+              {aiLoading && (
+                <p className="text-white/70 text-xs text-center py-2">
+                  Düşünüyor...
+                </p>
+              )}
+
+              {aiRecommendation && (
+                <div>
+                  <p className="text-white/90 text-xs leading-relaxed">
+                    {aiRecommendation}
+                  </p>
+                  <button
+                    onClick={getAIRecommendation}
+                    className="mt-2 text-white/50 text-xs hover:text-white/80">
+                    Yenile ↺
+                  </button>
+                </div>
+              )}
+            </div>
+
             <p className="text-gray-500 font-semibold text-sm">
               Önerilen Topluluklar
             </p>
