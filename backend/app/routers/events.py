@@ -126,9 +126,36 @@ def delete_event(
     """Club owner or core_team only – delete an event."""
     event = _get_event_or_404(event_id, db)
     _assert_club_staff(current_user, event.club_id, db)
+    # First delete all registrations for this event
+    db.query(EventRegistration).filter(
+        EventRegistration.event_id == event.id
+    ).delete()
+
+    # Then delete the event
     db.delete(event)
     db.commit()
     return {"message": "Event deleted successfully"}
+
+
+@router.put("/{event_id}", response_model=EventResponse)
+def update_event(
+    event_id,
+    payload: EventCreate,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    event = _get_event_or_404(event_id, db)
+    _assert_club_staff(current_user, event.club_id, db)
+    
+    event.title = payload.title
+    event.description = payload.description
+    event.location = payload.location
+    event.event_date = payload.event_date
+    event.capacity = payload.capacity
+    
+    db.commit()
+    db.refresh(event)
+    return _event_to_response(event, db)
 
 
 @router.post("/{event_id}/register")
@@ -173,6 +200,30 @@ def register_for_event(
         "registration": EventRegistrationResponse.model_validate(registration),
         "early_warning": early_warning,
     }
+
+
+@router.delete("/{event_id}/unregister")
+def unregister_from_event(
+    event_id,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    event = _get_event_or_404(event_id, db)
+    
+    registration = db.query(EventRegistration).filter(
+        EventRegistration.event_id == event.id,
+        EventRegistration.user_id == current_user.id
+    ).first()
+    
+    if not registration:
+        raise HTTPException(
+            status_code=404,
+            detail="Bu etkinliğe kayıtlı değilsiniz"
+        )
+    
+    db.delete(registration)
+    db.commit()
+    return {"message": "Kayıt iptal edildi"}
 
 
 @router.get("/{event_id}/registrations", response_model=List[RegistrationAttendeeResponse])

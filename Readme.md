@@ -33,6 +33,11 @@ A closed-loop SaaS ecosystem for university student communities. Campus Hub conn
    docker-compose up --build
    ```
 
-4. The API will be available at: [http://localhost:8000](http://localhost:8000)
+4. If you pull new updates with schema changes, run the manual database migration script (this ensures missing columns like 'grade' are added without losing data):
+   ```bash
+   docker-compose exec backend python migrate.py
+   ```
+
+5. The API will be available at: [http://localhost:8000](http://localhost:8000)
 
 5. Interactive API docs (Swagger UI): [http://localhost:8000/docs](http://localhost:8000/docs)

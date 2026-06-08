@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.auth import create_access_token, get_current_user, get_password_hash, verify_password, require_role
 from app.database import get_db
-from app.models import University, User
+from app.models import University, User, ClubMember, Club, EventRegistration, Event
 from app.schemas import Token, UserRegister, UserResponse, UserListResponse
 from pydantic import BaseModel
 
@@ -46,10 +46,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         db.query(University).filter(University.domain == domain).first()
     )
     if university is None:
-        uni_name = domain.removesuffix(".edu.tr")
-        if not uni_name:
-            uni_name = domain
-        university = University(name=uni_name, domain=domain)
+        university = University(name=body.university, domain=domain)
         db.add(university)
         db.flush()
 
@@ -59,6 +56,7 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
         email=normalized_email,
         student_no=local_part,
         department=body.department,
+        grade=body.grade,
         hashed_password=get_password_hash(body.password),
         role="student",
         is_verified=False,
@@ -101,3 +99,72 @@ def list_users(
     users = db.query(User).all()
     return users
 
+
+@router.get("/me/clubs")
+def get_my_clubs(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    memberships = (
+        db.query(ClubMember, Club)
+        .join(Club, Club.id == ClubMember.club_id)
+        .filter(
+            ClubMember.user_id == current_user.id,
+            Club.status == "active"
+        )
+        .all()
+    )
+    return [
+        {
+            "club_id": club.id,
+            "club_name": club.name,
+            "club_category": club.category,
+            "role": member.role,
+            "joined_at": member.joined_at
+        }
+        for member, club in memberships
+    ]
+
+
+@router.get("/me/events")
+def get_my_events(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    registrations = (
+        db.query(EventRegistration, Event)
+        .join(Event, Event.id == EventRegistration.event_id)
+        .filter(EventRegistration.user_id == current_user.id)
+        .all()
+    )
+    return [
+        {
+            "event_id": event.id,
+            "event_title": event.title,
+            "event_date": event.event_date,
+            "event_location": event.location,
+            "registered_at": reg.registered_at 
+              if hasattr(reg, 'registered_at') else None
+        }
+        for reg, event in registrations
+    ]
+
+
+@router.put("/me/password")
+def change_password(
+    body: dict,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)]
+):
+    old_password = body.get("old_password")
+    new_password = body.get("new_password")
+
+    if not verify_password(old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=400,
+            detail="Mevcut şifre yanlış"
+        )
+
+    current_user.hashed_password = get_password_hash(new_password)
+    db.commit()
+    return {"message": "Şifre güncellendi"}

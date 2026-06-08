@@ -1,43 +1,66 @@
-import { createContext, useContext, useState, useEffect } from 'react'
-import api from '../api/axios'
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../api/axios';
 
-const AuthContext = createContext(null)
+const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      api.get('/auth/me')
-        .then(res => setUser(res.data))
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false))
-    } else {
-      setLoading(false)
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user', e);
+      }
     }
-  }, [])
+    if (storedToken) {
+      setToken(storedToken);
+    }
+    setLoading(false);
+  }, []);
+
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { username: email, password })
-    localStorage.setItem('token', res.data.access_token)
-    const me = await api.get('/auth/me')
-    setUser(me.data)
-    return me.data
-  }
+    try {
+      const response = await api.post('/auth/login', {
+        username: email,
+        password: password
+      })
+      const fetchedToken = response.data.access_token
+
+      const userResponse = await api.get('/auth/me', {
+        headers: { Authorization: `Bearer ${fetchedToken}` }
+      })
+      const fetchedUser = userResponse.data
+
+      localStorage.setItem('token', fetchedToken)
+      localStorage.setItem('user', JSON.stringify(fetchedUser))
+      setToken(fetchedToken)
+      setUser(fetchedUser)
+      return fetchedUser
+    } catch (error) {
+      throw error
+    }
+  };
 
   const logout = () => {
-    localStorage.removeItem('token')
-    setUser(null)
-  }
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    window.location.href = '/';
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
-export function useAuth() {
-  return useContext(AuthContext)
-}
+export const useAuth = () => useContext(AuthContext);

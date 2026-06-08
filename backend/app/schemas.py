@@ -9,7 +9,9 @@ class UserRegister(BaseModel):
     email: EmailStr
     full_name: str
     password: str
-    department: Optional[str] = None
+    university: str
+    department: str
+    grade: str
 
 
 class UserLogin(BaseModel):
@@ -24,6 +26,7 @@ class UserResponse(BaseModel):
     full_name: str
     student_no: Optional[str]
     department: Optional[str]
+    grade: Optional[str]
     role: str
     is_verified: bool
 
@@ -36,6 +39,8 @@ class UserListResponse(BaseModel):
     email: str
     role: str
     is_verified: bool
+    department: Optional[str] = None
+    grade: Optional[str] = None
     created_at: Optional[datetime] = None
 
 
@@ -75,7 +80,7 @@ class ClubResponse(BaseModel):
     advisor_faculty: Optional[str] = None
     advisor_email: Optional[str] = None
     university_id: UUID
-    created_at: datetime
+    created_at: datetime | None = None
     follower_count: int = 0
 
 
@@ -87,7 +92,7 @@ class ClubMemberResponse(BaseModel):
     club_id: UUID
     role: str
     permissions: Optional[dict]
-    joined_at: datetime
+    joined_at: datetime | None = None
 
 
 # ── Event Schemas ─────────────────────────────────────────────────────────────
@@ -114,7 +119,7 @@ class EventResponse(BaseModel):
     event_date: datetime
     status: str
     club_id: UUID
-    created_at: datetime
+    created_at: datetime | None = None
     registration_count: int = 0
 
 
