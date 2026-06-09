@@ -6,6 +6,398 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+const EventsTab = ({
+  announcements, showCreateForm, setShowCreateForm,
+  form, setForm, salons, events, handleCreateEvent,
+  handleDeleteEvent, handleShowRegistrants, formatDate,
+  refreshing, fetchData, setRefreshing,
+  showStartPicker, setShowStartPicker, showEndPicker, setShowEndPicker,
+  startDate, setStartDate, endDate, setEndDate, formatDateForAPI,
+  showAllAnnouncements, setShowAllAnnouncements
+}) => (
+  <ScrollView
+    style={styles.scrollView}
+    showsVerticalScrollIndicator={false}
+    refreshControl={
+      <RefreshControl refreshing={refreshing}
+        onRefresh={() => { setRefreshing(true); fetchData(); }}
+        tintColor="#800000" />
+    }>
+
+    {(showAllAnnouncements 
+      ? announcements 
+      : announcements.slice(0, 2)).map(ann => (
+      <View key={ann.id} style={styles.announcementCard}>
+        <Text style={styles.announcementBadge}>📢 SKS Duyurusu</Text>
+        <Text style={styles.announcementTitle}>{ann.title}</Text>
+      </View>
+    ))}
+
+    {announcements.length > 2 && (
+      <TouchableOpacity
+        onPress={() => setShowAllAnnouncements(!showAllAnnouncements)}
+        style={styles.showAllBtn}>
+        <Text style={styles.showAllBtnText}>
+          {showAllAnnouncements 
+            ? 'Daha Az Göster ▲' 
+            : `Tümünü Gör (${announcements.length}) ▼`}
+        </Text>
+      </TouchableOpacity>
+    )}
+
+    <TouchableOpacity
+      style={styles.createBtn}
+      onPress={() => setShowCreateForm(!showCreateForm)}>
+      <Text style={styles.createBtnText}>
+        {showCreateForm ? '✕ İptal' : '+ Yeni Etkinlik Oluştur'}
+      </Text>
+    </TouchableOpacity>
+
+    {showCreateForm && (
+      <View style={styles.formCard}>
+        <Text style={styles.formTitle}>Yeni Etkinlik</Text>
+
+        <Text style={styles.label}>Başlık *</Text>
+        <TextInput
+          value={form.title}
+          onChangeText={v => setForm({...form, title: v})}
+          placeholder="Etkinlik başlığı"
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <Text style={styles.label}>Açıklama</Text>
+        <TextInput
+          value={form.description}
+          onChangeText={v => setForm({...form, description: v})}
+          placeholder="Etkinlik açıklaması"
+          style={[styles.input, {height: 80}]}
+          multiline
+          placeholderTextColor="#9ca3af"
+        />
+
+        <Text style={styles.label}>Konum *</Text>
+        <TextInput
+          value={form.location}
+          onChangeText={v => setForm({...form, location: v})}
+          placeholder="Etkinlik konumu"
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <Text style={styles.label}>Kontenjan</Text>
+        <TextInput
+          value={form.capacity}
+          onChangeText={v => setForm({...form, capacity: v})}
+          placeholder="Maksimum katılımcı sayısı"
+          keyboardType="numeric"
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <Text style={styles.label}>Başlangıç Tarihi/Saati *</Text>
+        <TouchableOpacity
+          style={styles.datePickerBtn}
+          onPress={() => setShowStartPicker(true)}>
+          <Text style={styles.datePickerText}>
+            📅 {form.start_time 
+              ? form.start_time 
+              : 'Başlangıç tarihi seç'}
+          </Text>
+        </TouchableOpacity>
+
+        {showStartPicker && (
+          <DateTimePicker
+            value={startDate}
+            mode="datetime"
+            display="spinner"
+            locale="tr-TR"
+            minimumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowStartPicker(false);
+              if (selectedDate) {
+                setStartDate(selectedDate);
+                setForm({...form, 
+                  start_time: formatDateForAPI(selectedDate)
+                });
+              }
+            }}
+          />
+        )}
+
+        <Text style={styles.label}>Bitiş Tarihi/Saati</Text>
+        <TouchableOpacity
+          style={styles.datePickerBtn}
+          onPress={() => setShowEndPicker(true)}>
+          <Text style={styles.datePickerText}>
+            📅 {form.end_time 
+              ? form.end_time 
+              : 'Bitiş tarihi seç'}
+          </Text>
+        </TouchableOpacity>
+
+        {showEndPicker && (
+          <DateTimePicker
+            value={endDate}
+            mode="datetime"
+            display="spinner"
+            locale="tr-TR"
+            minimumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowEndPicker(false);
+              if (selectedDate) {
+                setEndDate(selectedDate);
+                setForm({...form, 
+                  end_time: formatDateForAPI(selectedDate)
+                });
+              }
+            }}
+          />
+        )}
+
+        <Text style={styles.label}>Salon Seç</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}
+          style={{marginBottom: 16}}>
+          {salons.map(salon => (
+            <TouchableOpacity
+              key={salon.id}
+              style={[styles.salonChip,
+                form.salon_id === salon.id && styles.salonChipActive]}
+              onPress={() => setForm({...form, salon_id: salon.id})}>
+              <Text style={[styles.salonChipText,
+                form.salon_id === salon.id && styles.salonChipTextActive]}>
+                {salon.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity
+          style={styles.submitBtn}
+          onPress={handleCreateEvent}>
+          <Text style={styles.submitBtnText}>Etkinlik Oluştur</Text>
+        </TouchableOpacity>
+      </View>
+    )}
+
+    {events.length === 0 ? (
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyIcon}>📅</Text>
+        <Text style={styles.emptyText}>Henüz etkinlik yok</Text>
+      </View>
+    ) : (
+      events.map(event => (
+        <View key={event.id} style={styles.eventCard}>
+          <Text style={styles.eventTitle}>{event.title}</Text>
+          <Text style={styles.eventDate}>{formatDate(event.event_date)}</Text>
+          <Text style={styles.eventLocation}>📍 {event.location}</Text>
+          <Text style={styles.eventCount}>
+            👥 {event.registered_count || 0}
+            {event.capacity ? ` / ${event.capacity}` : ''} kayıtlı
+          </Text>
+          <View style={styles.eventActions}>
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => handleShowRegistrants(event.id)}>
+              <Text style={styles.actionBtnText}>Kayıt Olanlar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnDanger]}
+              onPress={() => handleDeleteEvent(event.id)}>
+              <Text style={styles.actionBtnDangerText}>Sil</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ))
+    )}
+    <View style={{height: 100}} />
+  </ScrollView>
+);
+
+const MembersTab = ({ members }) => (
+  <ScrollView style={styles.scrollView}
+    showsVerticalScrollIndicator={false}>
+    <Text style={styles.sectionTitle}>
+      Üyeler ({members.length})
+    </Text>
+    {members.map((member, index) => (
+      <View key={index} style={styles.memberCard}>
+        <View style={styles.memberAvatar}>
+          <Text style={styles.memberAvatarText}>
+            {member.full_name?.charAt(0) || '?'}
+          </Text>
+        </View>
+        <View>
+          <Text style={styles.memberName}>{member.full_name}</Text>
+          <Text style={styles.memberRole}>
+            {member.role === 'owner' ? 'Kulüp Başkanı' : 'Üye'}
+          </Text>
+        </View>
+      </View>
+    ))}
+    <View style={{height: 100}} />
+  </ScrollView>
+);
+
+const ProfileTab = ({ club, members, events, logout, navigate,
+  description, setDescription, clubSaved, handleSaveClub,
+  oldPassword, setOldPassword, newPassword, setNewPassword,
+  confirmPassword, setConfirmPassword, passwordError,
+  passwordSaved, handleChangePassword,
+  profileSettingsTab, setProfileSettingsTab,
+  profileModal, setProfileModal }) => (
+  <ScrollView style={styles.scrollView}
+    showsVerticalScrollIndicator={false}>
+
+    <View style={styles.profileCard}>
+      <View style={styles.profileAvatar}>
+        <Text style={styles.profileAvatarText}>
+          {club?.name?.charAt(0) || 'K'}
+        </Text>
+      </View>
+      <Text style={styles.profileName}>{club?.name}</Text>
+      <Text style={styles.profileCategory}>{club?.category}</Text>
+    </View>
+
+    <View style={styles.profileStats}>
+      <TouchableOpacity
+        style={styles.profileStat}
+        onPress={() => setProfileModal('members')}>
+        <Text style={styles.profileStatNum}>{members.length}</Text>
+        <Text style={styles.profileStatLabel}>Üye</Text>
+      </TouchableOpacity>
+      <View style={styles.profileStatDivider} />
+      <TouchableOpacity
+        style={styles.profileStat}
+        onPress={() => setProfileModal('events')}>
+        <Text style={styles.profileStatNum}>{events.length}</Text>
+        <Text style={styles.profileStatLabel}>Etkinlik</Text>
+      </TouchableOpacity>
+    </View>
+
+    <View style={styles.settingsTabRow}>
+      <TouchableOpacity
+        style={[styles.settingsTab, 
+          profileSettingsTab === 'club' && styles.settingsTabActive]}
+        onPress={() => setProfileSettingsTab('club')}>
+        <Text style={[styles.settingsTabText,
+          profileSettingsTab === 'club' && styles.settingsTabTextActive]}>
+          Kulüp Bilgileri
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.settingsTab,
+          profileSettingsTab === 'password' && styles.settingsTabActive]}
+        onPress={() => setProfileSettingsTab('password')}>
+        <Text style={[styles.settingsTabText,
+          profileSettingsTab === 'password' && styles.settingsTabTextActive]}>
+          Şifre
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    {profileSettingsTab === 'club' && (
+      <View style={styles.settingsCard}>
+        <Text style={styles.settingsTitle}>Kulüp Bilgileri</Text>
+        <Text style={styles.settingsSubtitle}>
+          Kulüp adı ve kategori SKS tarafından belirlenir.
+        </Text>
+
+        <Text style={styles.label}>Kulüp Adı</Text>
+        <View style={styles.readOnlyInput}>
+          <Text style={styles.readOnlyText}>{club?.name}</Text>
+        </View>
+
+        <Text style={styles.label}>Kategori</Text>
+        <View style={styles.readOnlyInput}>
+          <Text style={styles.readOnlyText}>{club?.category}</Text>
+        </View>
+
+        <Text style={styles.label}>Danışman</Text>
+        <View style={styles.readOnlyInput}>
+          <Text style={styles.readOnlyText}>
+            {club?.advisor_name || '-'}
+          </Text>
+        </View>
+
+        <Text style={styles.label}>Açıklama</Text>
+        <TextInput
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Kulüp açıklaması"
+          multiline
+          style={[styles.input, {height: 80}]}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={handleSaveClub}>
+          <Text style={styles.saveBtnText}>
+            {clubSaved ? '✓ Kaydedildi' : 'Kaydet'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    )}
+
+    {profileSettingsTab === 'password' && (
+      <View style={styles.settingsCard}>
+        <Text style={styles.settingsTitle}>Şifre Değiştir</Text>
+
+        <Text style={styles.label}>Mevcut Şifre</Text>
+        <TextInput
+          value={oldPassword}
+          onChangeText={setOldPassword}
+          placeholder="••••••••"
+          secureTextEntry
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <Text style={styles.label}>Yeni Şifre</Text>
+        <TextInput
+          value={newPassword}
+          onChangeText={setNewPassword}
+          placeholder="••••••••"
+          secureTextEntry
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        <Text style={styles.label}>Yeni Şifre (Tekrar)</Text>
+        <TextInput
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          placeholder="••••••••"
+          secureTextEntry
+          style={styles.input}
+          placeholderTextColor="#9ca3af"
+        />
+
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
+
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={handleChangePassword}>
+          <Text style={styles.saveBtnText}>
+            {passwordSaved ? '✓ Şifre Güncellendi' : 'Şifreyi Güncelle'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    )}
+
+    <TouchableOpacity
+      style={styles.logoutBtn}
+      onPress={async () => { await logout(); navigate('Login'); }}>
+      <Text style={styles.logoutText}>Çıkış Yap</Text>
+    </TouchableOpacity>
+    <View style={{height: 100}} />
+  </ScrollView>
+);
 
 export default function ClubDashboard({ navigate }) {
   const { user, logout } = useAuth();
@@ -25,6 +417,20 @@ export default function ClubDashboard({ navigate }) {
     capacity: '', start_time: '', end_time: '', salon_id: ''
   });
   const [salons, setSalons] = useState([]);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
+  const [description, setDescription] = useState('');
+  const [clubSaved, setClubSaved] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [profileSettingsTab, setProfileSettingsTab] = useState('club');
+  const [profileModal, setProfileModal] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -43,10 +449,11 @@ export default function ClubDashboard({ navigate }) {
           api.get('/announcements?target=club'),
         ]);
       setClub(clubRes);
+      setDescription(clubRes?.description || '');
       setEvents(eventsRes);
       setMembers(membersRes.data);
       setSalons(salonsRes.data);
-      setAnnouncements(annRes.data.slice(0, 2));
+      setAnnouncements(annRes.data);
     } catch (err) {
       console.log('Fetch error:', err);
     } finally {
@@ -56,6 +463,59 @@ export default function ClubDashboard({ navigate }) {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const formatDateDisplay = (date) => {
+    return date.toLocaleDateString('tr-TR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
+
+  const formatDateForAPI = (date) => {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const handleSaveClub = async () => {
+    try {
+      await api.put(`/clubs/${club.id}`, { description });
+      setClubSaved(true);
+      setTimeout(() => setClubSaved(false), 3000);
+    } catch {
+      Alert.alert('Hata', 'Bilgiler güncellenemedi.');
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordError('');
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Tüm alanları doldurun.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Yeni şifreler eşleşmiyor.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError('Şifre en az 6 karakter olmalı.');
+      return;
+    }
+    try {
+      await api.put('/auth/me/password', {
+        old_password: oldPassword,
+        new_password: newPassword,
+      });
+      setPasswordSaved(true);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordSaved(false), 3000);
+    } catch {
+      setPasswordError('Mevcut şifre yanlış.');
+    }
+  };
 
   const handleCreateEvent = async () => {
     if (!form.title || !form.location || !form.start_time) {
@@ -68,7 +528,7 @@ export default function ClubDashboard({ navigate }) {
         description: form.description,
         location: form.location,
         capacity: form.capacity ? parseInt(form.capacity) : null,
-        event_date: form.start_time,
+        event_date: formatDateForAPI(form.start_time),
         club_id: club.id,
       });
       if (form.salon_id && form.start_time) {
@@ -91,8 +551,13 @@ export default function ClubDashboard({ navigate }) {
       setShowCreateForm(false);
       setForm({ title:'', description:'', location:'',
         capacity:'', start_time:'', end_time:'', salon_id:'' });
-      fetchData();
+      const myClubsRes = await api.get('/auth/me/clubs');
+      const clubId = myClubsRes.data[0].club_id;
+      const eventsRes = await api.get('/events');
+      setEvents(eventsRes.data.filter(e => e.club_id === clubId));
     } catch (err) {
+      console.log('CREATE EVENT ERROR:', JSON.stringify(err.response?.data));
+      console.log('CREATE EVENT STATUS:', err.response?.status);
       Alert.alert('Hata', 'Etkinlik oluşturulamadı.');
     }
   };
@@ -136,220 +601,6 @@ export default function ClubDashboard({ navigate }) {
     );
   }
 
-  // EVENTS TAB
-  const EventsTab = () => (
-    <ScrollView
-      style={styles.scrollView}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing}
-          onRefresh={() => { setRefreshing(true); fetchData(); }}
-          tintColor="#800000" />
-      }>
-
-      {announcements.map(ann => (
-        <View key={ann.id} style={styles.announcementCard}>
-          <Text style={styles.announcementBadge}>📢 SKS Duyurusu</Text>
-          <Text style={styles.announcementTitle}>{ann.title}</Text>
-        </View>
-      ))}
-
-      <TouchableOpacity
-        style={styles.createBtn}
-        onPress={() => setShowCreateForm(!showCreateForm)}>
-        <Text style={styles.createBtnText}>
-          {showCreateForm ? '✕ İptal' : '+ Yeni Etkinlik Oluştur'}
-        </Text>
-      </TouchableOpacity>
-
-      {showCreateForm && (
-        <View style={styles.formCard}>
-          <Text style={styles.formTitle}>Yeni Etkinlik</Text>
-
-          <Text style={styles.label}>Başlık *</Text>
-          <TextInput
-            value={form.title}
-            onChangeText={v => setForm({...form, title: v})}
-            placeholder="Etkinlik başlığı"
-            style={styles.input}
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Text style={styles.label}>Açıklama</Text>
-          <TextInput
-            value={form.description}
-            onChangeText={v => setForm({...form, description: v})}
-            placeholder="Etkinlik açıklaması"
-            style={[styles.input, {height: 80}]}
-            multiline
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Text style={styles.label}>Konum *</Text>
-          <TextInput
-            value={form.location}
-            onChangeText={v => setForm({...form, location: v})}
-            placeholder="Etkinlik konumu"
-            style={styles.input}
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Text style={styles.label}>Kontenjan</Text>
-          <TextInput
-            value={form.capacity}
-            onChangeText={v => setForm({...form, capacity: v})}
-            placeholder="Maksimum katılımcı sayısı"
-            keyboardType="numeric"
-            style={styles.input}
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Text style={styles.label}>Başlangıç Tarihi/Saati *</Text>
-          <TextInput
-            value={form.start_time}
-            onChangeText={v => setForm({...form, start_time: v})}
-            placeholder="2026-06-20T14:00"
-            style={styles.input}
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Text style={styles.label}>Bitiş Tarihi/Saati</Text>
-          <TextInput
-            value={form.end_time}
-            onChangeText={v => setForm({...form, end_time: v})}
-            placeholder="2026-06-20T16:00"
-            style={styles.input}
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Text style={styles.label}>Salon Seç</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}
-            style={{marginBottom: 16}}>
-            {salons.map(salon => (
-              <TouchableOpacity
-                key={salon.id}
-                style={[styles.salonChip,
-                  form.salon_id === salon.id && styles.salonChipActive]}
-                onPress={() => setForm({...form, salon_id: salon.id})}>
-                <Text style={[styles.salonChipText,
-                  form.salon_id === salon.id && styles.salonChipTextActive]}>
-                  {salon.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <TouchableOpacity
-            style={styles.submitBtn}
-            onPress={handleCreateEvent}>
-            <Text style={styles.submitBtnText}>Etkinlik Oluştur</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {events.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>📅</Text>
-          <Text style={styles.emptyText}>Henüz etkinlik yok</Text>
-        </View>
-      ) : (
-        events.map(event => (
-          <View key={event.id} style={styles.eventCard}>
-            <Text style={styles.eventTitle}>{event.title}</Text>
-            <Text style={styles.eventDate}>{formatDate(event.event_date)}</Text>
-            <Text style={styles.eventLocation}>📍 {event.location}</Text>
-            <Text style={styles.eventCount}>
-              👥 {event.registered_count || 0}
-              {event.capacity ? ` / ${event.capacity}` : ''} kayıtlı
-            </Text>
-            <View style={styles.eventActions}>
-              <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={() => handleShowRegistrants(event.id)}>
-                <Text style={styles.actionBtnText}>Kayıt Olanlar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnDanger]}
-                onPress={() => handleDeleteEvent(event.id)}>
-                <Text style={styles.actionBtnDangerText}>Sil</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))
-      )}
-      <View style={{height: 100}} />
-    </ScrollView>
-  );
-
-  // MEMBERS TAB
-  const MembersTab = () => (
-    <ScrollView style={styles.scrollView}
-      showsVerticalScrollIndicator={false}>
-      <Text style={styles.sectionTitle}>
-        Üyeler ({members.length})
-      </Text>
-      {members.map((member, index) => (
-        <View key={index} style={styles.memberCard}>
-          <View style={styles.memberAvatar}>
-            <Text style={styles.memberAvatarText}>
-              {member.full_name?.charAt(0) || '?'}
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.memberName}>{member.full_name}</Text>
-            <Text style={styles.memberRole}>
-              {member.role === 'owner' ? 'Kulüp Başkanı' : 'Üye'}
-            </Text>
-          </View>
-        </View>
-      ))}
-      <View style={{height: 100}} />
-    </ScrollView>
-  );
-
-  // PROFILE TAB
-  const ProfileTab = () => (
-    <ScrollView style={styles.scrollView}
-      showsVerticalScrollIndicator={false}>
-      <View style={styles.profileCard}>
-        <View style={styles.profileAvatar}>
-          <Text style={styles.profileAvatarText}>
-            {club?.name?.charAt(0) || 'K'}
-          </Text>
-        </View>
-        <Text style={styles.profileName}>{club?.name}</Text>
-        <Text style={styles.profileCategory}>{club?.category}</Text>
-        <Text style={styles.profileDesc}>{club?.description}</Text>
-      </View>
-
-      <View style={styles.profileStats}>
-        <View style={styles.profileStat}>
-          <Text style={styles.profileStatNum}>{members.length}</Text>
-          <Text style={styles.profileStatLabel}>Üye</Text>
-        </View>
-        <View style={styles.profileStatDivider} />
-        <View style={styles.profileStat}>
-          <Text style={styles.profileStatNum}>{events.length}</Text>
-          <Text style={styles.profileStatLabel}>Etkinlik</Text>
-        </View>
-      </View>
-
-      <View style={styles.infoCard}>
-        <Text style={styles.infoLabel}>Danışman</Text>
-        <Text style={styles.infoValue}>{club?.advisor_name || '-'}</Text>
-        <Text style={styles.infoLabel}>E-posta</Text>
-        <Text style={styles.infoValue}>{club?.advisor_email || '-'}</Text>
-      </View>
-
-      <TouchableOpacity
-        style={styles.logoutBtn}
-        onPress={async () => { await logout(); navigate('Login'); }}>
-        <Text style={styles.logoutText}>Çıkış Yap</Text>
-      </TouchableOpacity>
-      <View style={{height: 100}} />
-    </ScrollView>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Navbar */}
@@ -357,17 +608,68 @@ export default function ClubDashboard({ navigate }) {
         <Text style={styles.navTitle}>
           {club?.name || 'Campus Hub'}
         </Text>
-        <View style={styles.navAvatar}>
+        <TouchableOpacity
+          style={styles.navAvatar}
+          onPress={() => setActiveTab('profile')}>
           <Text style={styles.navAvatarText}>
             {club?.name?.charAt(0) || 'K'}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
-      {activeTab === 'events' && <EventsTab />}
-      {activeTab === 'members' && <MembersTab />}
-      {activeTab === 'profile' && <ProfileTab />}
+      {activeTab === 'events' && <EventsTab 
+        announcements={announcements}
+        showCreateForm={showCreateForm}
+        setShowCreateForm={setShowCreateForm}
+        form={form}
+        setForm={setForm}
+        salons={salons}
+        events={events}
+        handleCreateEvent={handleCreateEvent}
+        handleDeleteEvent={handleDeleteEvent}
+        handleShowRegistrants={handleShowRegistrants}
+        formatDate={formatDate}
+        refreshing={refreshing}
+        fetchData={fetchData}
+        setRefreshing={setRefreshing}
+        showStartPicker={showStartPicker}
+        setShowStartPicker={setShowStartPicker}
+        showEndPicker={showEndPicker}
+        setShowEndPicker={setShowEndPicker}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        formatDateForAPI={formatDateForAPI}
+        showAllAnnouncements={showAllAnnouncements}
+        setShowAllAnnouncements={setShowAllAnnouncements}
+      />}
+      {activeTab === 'members' && <MembersTab members={members} />}
+      {activeTab === 'profile' && <ProfileTab 
+        club={club}
+        members={members}
+        events={events}
+        logout={logout}
+        navigate={navigate}
+        description={description}
+        setDescription={setDescription}
+        clubSaved={clubSaved}
+        handleSaveClub={handleSaveClub}
+        oldPassword={oldPassword}
+        setOldPassword={setOldPassword}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        passwordError={passwordError}
+        passwordSaved={passwordSaved}
+        handleChangePassword={handleChangePassword}
+        profileSettingsTab={profileSettingsTab}
+        setProfileSettingsTab={setProfileSettingsTab}
+        profileModal={profileModal}
+        setProfileModal={setProfileModal}
+      />}
 
       {/* Bottom Tab Bar */}
       <View style={styles.tabBar}>
@@ -431,6 +733,70 @@ export default function ClubDashboard({ navigate }) {
             <TouchableOpacity
               style={styles.modalCloseBtn}
               onPress={() => setRegistrantsModal(null)}>
+              <Text style={styles.modalCloseBtnText}>Kapat</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={!!profileModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setProfileModal(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {profileModal === 'members' ? '👥 Üyeler' : '📅 Etkinlikler'}
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {profileModal === 'members' && (
+                members.length === 0 ? (
+                  <Text style={styles.modalEmpty}>Üye yok</Text>
+                ) : (
+                  members.map((m, i) => (
+                    <View key={i} style={styles.modalItem}>
+                      <View style={styles.modalItemAvatar}>
+                        <Text style={styles.modalItemAvatarText}>
+                          {m.full_name?.charAt(0) || '?'}
+                        </Text>
+                      </View>
+                      <View style={styles.modalItemInfo}>
+                        <Text style={styles.modalItemTitle}>{m.full_name}</Text>
+                        <Text style={styles.modalItemSub}>
+                          {m.role === 'owner' ? 'Kulüp Başkanı' : 'Üye'}
+                        </Text>
+                      </View>
+                    </View>
+                  ))
+                )
+              )}
+              {profileModal === 'events' && (
+                events.length === 0 ? (
+                  <Text style={styles.modalEmpty}>Etkinlik yok</Text>
+                ) : (
+                  events.map((e, i) => (
+                    <View key={i} style={styles.modalItem}>
+                      <View style={styles.modalItemIcon}>
+                        <Text style={styles.modalItemIconText}>📅</Text>
+                      </View>
+                      <View style={styles.modalItemInfo}>
+                        <Text style={styles.modalItemTitle}>{e.title}</Text>
+                        <Text style={styles.modalItemSub}>
+                          📍 {e.location}
+                        </Text>
+                        <Text style={styles.modalItemSub}>
+                          👥 {e.registered_count || 0} kayıtlı
+                        </Text>
+                      </View>
+                    </View>
+                  ))
+                )
+              )}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={() => setProfileModal(null)}>
               <Text style={styles.modalCloseBtnText}>Kapat</Text>
             </TouchableOpacity>
           </View>
@@ -561,4 +927,64 @@ const styles = StyleSheet.create({
   modalCloseBtn: { backgroundColor: '#800000', borderRadius: 12,
     paddingVertical: 14, alignItems: 'center', marginTop: 16 },
   modalCloseBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  datePickerBtn: { borderWidth: 1.5, borderColor: '#e5e7eb',
+    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14,
+    backgroundColor: '#fafafa', marginBottom: 14 },
+  datePickerText: { color: '#374151', fontSize: 14 },
+  showAllBtn: { alignItems: 'center', paddingVertical: 10 },
+  showAllBtnText: { color: '#800000', fontSize: 13, fontWeight: '600' },
+  settingsTabRow: { flexDirection: 'row', backgroundColor: '#fff',
+    borderRadius: 12, padding: 4, marginTop: 12,
+    shadowColor: '#000', shadowOffset: {width:0, height:2},
+    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
+  settingsTab: { flex: 1, paddingVertical: 10,
+    alignItems: 'center', borderRadius: 10 },
+  settingsTabActive: { backgroundColor: '#800000' },
+  settingsTabText: { color: '#6b7280', fontWeight: '600', fontSize: 13 },
+  settingsTabTextActive: { color: '#fff' },
+  settingsCard: { backgroundColor: '#fff', borderRadius: 16,
+    padding: 20, marginTop: 12,
+    shadowColor: '#000', shadowOffset: {width:0, height:2},
+    shadowOpacity: 0.07, shadowRadius: 8, elevation: 2 },
+  settingsTitle: { color: '#1f2937', fontWeight: 'bold',
+    fontSize: 16, marginBottom: 6 },
+  settingsSubtitle: { color: '#9ca3af', fontSize: 12,
+    lineHeight: 18, marginBottom: 16 },
+  readOnlyInput: { backgroundColor: '#f9fafb', borderRadius: 12,
+    borderWidth: 1, borderColor: '#f3f4f6',
+    paddingHorizontal: 16, paddingVertical: 12, marginBottom: 14 },
+  readOnlyText: { color: '#9ca3af', fontSize: 14 },
+  saveBtn: { backgroundColor: '#800000', borderRadius: 12,
+    paddingVertical: 14, alignItems: 'center', marginTop: 4 },
+  saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  errorText: { color: '#dc2626', fontSize: 12, marginBottom: 10 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#fff',
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    padding: 24, maxHeight: '70%' },
+  modalTitle: { color: '#1f2937', fontWeight: 'bold',
+    fontSize: 18, marginBottom: 16 },
+  modalEmpty: { color: '#9ca3af', fontSize: 14,
+    textAlign: 'center', paddingVertical: 20 },
+  modalItem: { flexDirection: 'row', alignItems: 'center',
+    paddingVertical: 12, borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6' },
+  modalItemAvatar: { width: 40, height: 40, borderRadius: 20,
+    backgroundColor: '#800000', justifyContent: 'center',
+    alignItems: 'center', marginRight: 12 },
+  modalItemAvatarText: { color: '#fff', fontWeight: 'bold',
+    fontSize: 16 },
+  modalItemIcon: { width: 40, height: 40, borderRadius: 20,
+    backgroundColor: '#fff5f5', justifyContent: 'center',
+    alignItems: 'center', marginRight: 12 },
+  modalItemIconText: { fontSize: 18 },
+  modalItemInfo: { flex: 1 },
+  modalItemTitle: { color: '#1f2937', fontWeight: '600',
+    fontSize: 14 },
+  modalItemSub: { color: '#9ca3af', fontSize: 12, marginTop: 2 },
+  modalCloseBtn: { backgroundColor: '#800000', borderRadius: 12,
+    paddingVertical: 14, alignItems: 'center', marginTop: 16 },
+  modalCloseBtnText: { color: '#fff', fontWeight: 'bold',
+    fontSize: 15 },
 });

@@ -34,6 +34,8 @@ export function AuthProvider({ children }) {
     });
     const { access_token } = res.data;
     await AsyncStorage.setItem('token', access_token);
+    api.defaults.headers.common['Authorization'] = 
+      `Bearer ${access_token}`;
     const userRes = await api.get('/auth/me', {
       headers: { Authorization: `Bearer ${access_token}` }
     });

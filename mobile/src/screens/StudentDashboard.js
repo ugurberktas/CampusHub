@@ -293,9 +293,6 @@ export default function StudentDashboard({ navigate }) {
       setClubs(clubsRes.data);
       setAnnouncements(annRes.data);
       setRegisteredEvents(myEventsRes.data.map(e => String(e.event_id)));
-      console.log('MY EVENTS RAW:', JSON.stringify(myEventsRes.data));
-      console.log('REGISTERED IDS:', myEventsRes.data.map(e => String(e.event_id)));
-      console.log('ALL EVENTS IDS:', eventsRes.data.map(e => String(e.id)));
       setJoinedClubs(myClubsRes.data.map(c => c.club_id));
     } catch (err) {
       console.log('Fetch error:', err);
@@ -638,7 +635,11 @@ export default function StudentDashboard({ navigate }) {
                 registeredEvents.length === 0 ? (
                   <Text style={styles.modalEmpty}>Kayıtlı etkinlik yok</Text>
                 ) : (
-                  events.filter(e => registeredEvents.includes(String(e.id))).map(event => (
+                  events.filter(e => 
+                    registeredEvents.some(rid => 
+                      String(rid) === String(e.id)
+                    )
+                  ).map(event => (
                     <View key={event.id} style={styles.modalItem}>
                       <View style={styles.modalItemIcon}>
                         <Text style={styles.modalItemIconText}>📅</Text>

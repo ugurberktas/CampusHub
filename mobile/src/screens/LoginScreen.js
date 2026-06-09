@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   SafeAreaView, ActivityIndicator, Alert,
-  StyleSheet, Animated, KeyboardAvoidingView, Platform
+  StyleSheet, Animated, KeyboardAvoidingView, Platform, ScrollView
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,6 +14,24 @@ export default function LoginScreen({ navigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regDepartment, setRegDepartment] = useState('');
+  const [regStudentNo, setRegStudentNo] = useState('');
+  const [regLoading, setRegLoading] = useState(false);
+  const [regGrade, setRegGrade] = useState('1');
+  const [clubStep, setClubStep] = useState(1);
+  const [regClubOwnerName, setRegClubOwnerName] = useState('');
+  const [regClubOwnerEmail, setRegClubOwnerEmail] = useState('');
+  const [regClubOwnerPassword, setRegClubOwnerPassword] = useState('');
+  const [regClubName, setRegClubName] = useState('');
+  const [regClubDesc, setRegClubDesc] = useState('');
+  const [regClubCategory, setRegClubCategory] = useState('Bilim');
+  const [regAdvisorName, setRegAdvisorName] = useState('');
+  const [regAdvisorFaculty, setRegAdvisorFaculty] = useState('');
+  const [regAdvisorEmail, setRegAdvisorEmail] = useState('');
+  const [regClubLoading, setRegClubLoading] = useState(false);
 
   const logoScale = useRef(new Animated.Value(0.3)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -56,6 +74,107 @@ export default function LoginScreen({ navigate }) {
       Alert.alert('Hata', 'E-posta veya şifre yanlış.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!regName || !regEmail || !regPassword || !regDepartment) {
+      Alert.alert('Hata', 'Ad, e-posta, şifre ve bölüm zorunludur.');
+      return;
+    }
+    if (!regEmail.endsWith('.edu.tr')) {
+      Alert.alert('Hata', 'Geçerli bir üniversite e-postası girin.');
+      return;
+    }
+    setRegLoading(true);
+    try {
+      const api = require('../api/axios').default;
+      await api.post('/auth/register', {
+        full_name: regName,
+        email: regEmail,
+        password: regPassword,
+        department: regDepartment,
+        student_no: regStudentNo,
+        grade: regGrade,
+        role: 'student',
+        university_id: 'ff32ece1-cb04-443f-ac8b-45f924fd8709',
+        university: 'ff32ece1-cb04-443f-ac8b-45f924fd8709',
+      });
+      Alert.alert('Başarılı', 'Kayıt tamamlandı! Giriş yapabilirsiniz.', [
+        { text: 'Tamam', onPress: () => {
+          setScreen('login');
+          setRole('student');
+        }}
+      ]);
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Kayıt başarısız.';
+      Alert.alert('Hata', msg);
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
+  const handleClubRegister = async () => {
+    if (!regClubOwnerName || !regClubOwnerEmail || 
+      !regClubOwnerPassword || !regClubName) {
+      Alert.alert('Hata', 'Zorunlu alanları doldurun.');
+      return;
+    }
+    if (!regClubOwnerEmail.endsWith('.edu.tr')) {
+      Alert.alert('Hata', 'Geçerli bir üniversite e-postası girin.');
+      return;
+    }
+    setRegClubLoading(true);
+    try {
+      const api = require('../api/axios').default;
+      await api.post('/auth/register', {
+        full_name: regClubOwnerName,
+        email: regClubOwnerEmail,
+        password: regClubOwnerPassword,
+        role: 'club_owner',
+        university_id: 'ff32ece1-cb04-443f-ac8b-45f924fd8709',
+        university: 'ff32ece1-cb04-443f-ac8b-45f924fd8709',
+        department: 'Kulüp Yöneticisi',
+        grade: '0',
+        club_name: regClubName,
+        club_description: regClubDesc,
+        club_category: regClubCategory,
+        advisor_name: regAdvisorName,
+        advisor_faculty: regAdvisorFaculty,
+        advisor_email: regAdvisorEmail,
+      });
+
+      const loginRes = await api.post('/auth/login', {
+        username: regClubOwnerEmail,
+        password: regClubOwnerPassword,
+      });
+      const token = loginRes.data.access_token;
+
+      await api.post('/clubs', {
+        name: regClubName,
+        description: regClubDesc,
+        category: regClubCategory,
+        advisor_name: regAdvisorName,
+        advisor_faculty: regAdvisorFaculty,
+        advisor_email: regAdvisorEmail,
+        university_id: 'ff32ece1-cb04-443f-ac8b-45f924fd8709',
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      Alert.alert('Başarılı', 
+        'Başvurunuz alındı! SKS onayından sonra giriş yapabilirsiniz.', [
+        { text: 'Tamam', onPress: () => {
+          setScreen('login');
+          setRole('club_owner');
+          setClubStep(1);
+        }}
+      ]);
+    } catch (err) {
+      const msg = err.response?.data?.detail || 'Kayıt başarısız.';
+      Alert.alert('Hata', typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } finally {
+      setRegClubLoading(false);
     }
   };
 
@@ -141,57 +260,353 @@ export default function LoginScreen({ navigate }) {
     );
   }
 
+  // REGISTER ekranı
+  if (screen === 'register') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.splashInner}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+
+            <TouchableOpacity
+              onPress={() => setScreen('login')}
+              style={styles.backBtn}>
+              <Text style={styles.backText}>‹ Giriş Yap</Text>
+            </TouchableOpacity>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>🎓 Öğrenci Kaydı</Text>
+
+              <Text style={styles.label}>Ad Soyad *</Text>
+              <TextInput
+                value={regName}
+                onChangeText={setRegName}
+                placeholder="Adınız Soyadınız"
+                placeholderTextColor="#9ca3af"
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>E-posta *</Text>
+              <TextInput
+                value={regEmail}
+                onChangeText={setRegEmail}
+                placeholder="ornek@firat.edu.tr"
+                placeholderTextColor="#9ca3af"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Şifre *</Text>
+              <TextInput
+                value={regPassword}
+                onChangeText={setRegPassword}
+                placeholder="••••••••"
+                placeholderTextColor="#9ca3af"
+                secureTextEntry
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Bölüm *</Text>
+              <TextInput
+                value={regDepartment}
+                onChangeText={setRegDepartment}
+                placeholder="Bilgisayar Mühendisliği"
+                placeholderTextColor="#9ca3af"
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Sınıf *</Text>
+              <View style={styles.gradeRow}>
+                {['Hazırlık','1','2','3','4','5','6'].map(g => (
+                  <TouchableOpacity
+                    key={g}
+                    style={[styles.gradeChip, 
+                      regGrade === g && styles.gradeChipActive]}
+                    onPress={() => setRegGrade(g)}>
+                    <Text style={[styles.gradeChipText,
+                      regGrade === g && styles.gradeChipTextActive]}>
+                      {g}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.label}>Öğrenci No</Text>
+              <TextInput
+                value={regStudentNo}
+                onChangeText={setRegStudentNo}
+                placeholder="210201001"
+                placeholderTextColor="#9ca3af"
+                keyboardType="numeric"
+                style={styles.input}
+              />
+
+              <TouchableOpacity
+                onPress={handleRegister}
+                disabled={regLoading}
+                style={styles.button}>
+                {regLoading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.buttonText}>Kayıt Ol</Text>}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+
+  if (screen === 'clubRegister') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1, 
+              justifyContent: 'center', paddingHorizontal: 24,
+              paddingVertical: 20 }}>
+
+            <TouchableOpacity
+              onPress={() => {
+                if (clubStep === 1) setScreen('login');
+                else setClubStep(1);
+              }}
+              style={styles.backBtn}>
+              <Text style={styles.backText}>
+                {clubStep === 1 ? '‹ Giriş Yap' : '‹ Geri'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Step indicator */}
+            <View style={styles.stepRow}>
+              <View style={[styles.stepCircle, 
+                clubStep >= 1 && styles.stepCircleActive]}>
+                <Text style={[styles.stepNum,
+                  clubStep >= 1 && styles.stepNumActive]}>1</Text>
+              </View>
+              <View style={styles.stepLine} />
+              <View style={[styles.stepCircle,
+                clubStep >= 2 && styles.stepCircleActive]}>
+                <Text style={[styles.stepNum,
+                  clubStep >= 2 && styles.stepNumActive]}>2</Text>
+              </View>
+            </View>
+
+            <View style={styles.card}>
+              {clubStep === 1 ? (
+                <>
+                  <Text style={styles.cardTitle}>🏛️ Topluluk Başkanı</Text>
+                  <Text style={styles.stepSubtitle}>Önce hesabınızı oluşturun</Text>
+
+                  <Text style={styles.label}>Ad Soyad *</Text>
+                  <TextInput
+                    value={regClubOwnerName}
+                    onChangeText={setRegClubOwnerName}
+                    placeholder="Adınız Soyadınız"
+                    placeholderTextColor="#9ca3af"
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>E-posta *</Text>
+                  <TextInput
+                    value={regClubOwnerEmail}
+                    onChangeText={setRegClubOwnerEmail}
+                    placeholder="ornek@firat.edu.tr"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>Şifre *</Text>
+                  <TextInput
+                    value={regClubOwnerPassword}
+                    onChangeText={setRegClubOwnerPassword}
+                    placeholder="••••••••"
+                    placeholderTextColor="#9ca3af"
+                    secureTextEntry
+                    style={styles.input}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {
+                      if (!regClubOwnerName || !regClubOwnerEmail || 
+                        !regClubOwnerPassword) {
+                        Alert.alert('Hata', 'Tüm alanları doldurun.');
+                        return;
+                      }
+                      setClubStep(2);
+                    }}>
+                    <Text style={styles.buttonText}>Devam Et →</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.cardTitle}>Kulüp Bilgileri</Text>
+                  <Text style={styles.stepSubtitle}>Kulübünüzü tanıtın</Text>
+
+                  <Text style={styles.label}>Kulüp Adı *</Text>
+                  <TextInput
+                    value={regClubName}
+                    onChangeText={setRegClubName}
+                    placeholder="Kulüp adı"
+                    placeholderTextColor="#9ca3af"
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>Açıklama</Text>
+                  <TextInput
+                    value={regClubDesc}
+                    onChangeText={setRegClubDesc}
+                    placeholder="Kulübünüzü kısaca tanıtın"
+                    placeholderTextColor="#9ca3af"
+                    multiline
+                    style={[styles.input, {height: 70}]}
+                  />
+
+                  <Text style={styles.label}>Kategori</Text>
+                  <View style={styles.gradeRow}>
+                    {['Bilim','Kültürel','Spor','Müzik','Sanat','Diğer'].map(cat => (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[styles.gradeChip,
+                          regClubCategory === cat && styles.gradeChipActive]}
+                        onPress={() => setRegClubCategory(cat)}>
+                        <Text style={[styles.gradeChipText,
+                          regClubCategory === cat && styles.gradeChipTextActive]}>
+                          {cat}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <Text style={styles.label}>Danışman Adı</Text>
+                  <TextInput
+                    value={regAdvisorName}
+                    onChangeText={setRegAdvisorName}
+                    placeholder="Prof. Dr. Adı Soyadı"
+                    placeholderTextColor="#9ca3af"
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>Danışman E-postası</Text>
+                  <TextInput
+                    value={regAdvisorEmail}
+                    onChangeText={setRegAdvisorEmail}
+                    placeholder="danisman@firat.edu.tr"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleClubRegister}
+                    disabled={regClubLoading}>
+                    {regClubLoading
+                      ? <ActivityIndicator color="#fff" />
+                      : <Text style={styles.buttonText}>Kayıt Ol</Text>}
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+
   // LOGIN ekranı
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.splashInner}>
-
-        <TouchableOpacity
-          onPress={() => setScreen('landing')}
-          style={styles.backBtn}>
-          <Text style={styles.backText}>‹ Geri</Text>
-        </TouchableOpacity>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            {role === 'student' ? '🎓 Öğrenci Girişi'
-              : role === 'club_owner' ? '🏛️ Topluluk Girişi'
-              : '🔐 SKS Girişi'}
-          </Text>
-
-          <Text style={styles.label}>E-posta</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="ornek@firat.edu.tr"
-            placeholderTextColor="#9ca3af"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            style={styles.input}
-          />
-
-          <Text style={styles.label}>Şifre</Text>
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••••"
-            placeholderTextColor="#9ca3af"
-            secureTextEntry
-            style={styles.input}
-          />
+        style={{ flex: 1 }}>
+        <View style={{ 
+          flex: 1, 
+          justifyContent: 'center', 
+          paddingHorizontal: 24,
+          paddingTop: 0,
+          marginTop: 0,
+        }}>
 
           <TouchableOpacity
-            onPress={handleLogin}
-            disabled={loading}
-            style={styles.button}>
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.buttonText}>Giriş Yap</Text>}
+            onPress={() => setScreen('landing')}
+            style={styles.backBtn}>
+            <Text style={styles.backText}>‹ Geri</Text>
           </TouchableOpacity>
-        </View>
 
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                {role === 'student' ? '🎓 Öğrenci Girişi'
+                  : role === 'club_owner' ? '🏛️ Topluluk Girişi'
+                  : '🔐 SKS Girişi'}
+              </Text>
+
+              <Text style={styles.label}>E-posta</Text>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="ornek@firat.edu.tr"
+                placeholderTextColor="#9ca3af"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Şifre</Text>
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="••••••••"
+                placeholderTextColor="#9ca3af"
+                secureTextEntry
+                style={styles.input}
+              />
+
+              <TouchableOpacity
+                onPress={handleLogin}
+                disabled={loading}
+                style={styles.button}>
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.buttonText}>Giriş Yap</Text>}
+              </TouchableOpacity>
+
+              {role === 'student' && (
+                <TouchableOpacity
+                  style={styles.registerLink}
+                  onPress={() => setScreen('register')}>
+                  <Text style={styles.registerLinkText}>
+                    Hesabın yok mu? <Text style={styles.registerLinkBold}>Kayıt Ol</Text>
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {role === 'club_owner' && (
+                <TouchableOpacity
+                  style={styles.registerLink}
+                  onPress={() => { setScreen('clubRegister'); setClubStep(1); }}>
+                  <Text style={styles.registerLinkText}>
+                    Hesabın yok mu? <Text style={styles.registerLinkBold}>Kayıt Ol</Text>
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -218,4 +633,27 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1.5, borderColor: '#e5e7eb', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 13, fontSize: 15, color: '#111827', marginBottom: 16, backgroundColor: '#fafafa' },
   button: { backgroundColor: '#800000', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8, shadowColor: '#800000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  registerLink: { alignItems: 'center', marginTop: 16 },
+  registerLinkText: { color: '#6b7280', fontSize: 13 },
+  registerLinkBold: { color: '#800000', fontWeight: 'bold' },
+  gradeRow: { flexDirection: 'row', flexWrap: 'wrap',
+    gap: 8, marginBottom: 16 },
+  gradeChip: { borderWidth: 1.5, borderColor: '#e5e7eb',
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 },
+  gradeChipActive: { backgroundColor: '#800000',
+    borderColor: '#800000' },
+  gradeChipText: { color: '#6b7280', fontSize: 13 },
+  gradeChipTextActive: { color: '#fff', fontWeight: '600' },
+  stepRow: { flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'center', marginBottom: 24 },
+  stepCircle: { width: 32, height: 32, borderRadius: 16,
+    borderWidth: 2, borderColor: '#e5e7eb',
+    justifyContent: 'center', alignItems: 'center' },
+  stepCircleActive: { backgroundColor: '#800000',
+    borderColor: '#800000' },
+  stepNum: { color: '#9ca3af', fontWeight: 'bold', fontSize: 14 },
+  stepNumActive: { color: '#fff' },
+  stepLine: { flex: 1, height: 2, backgroundColor: '#e5e7eb',
+    marginHorizontal: 8 },
+  stepSubtitle: { color: '#6b7280', fontSize: 13, marginBottom: 20 },
 });

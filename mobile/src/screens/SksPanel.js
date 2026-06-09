@@ -36,8 +36,10 @@ export default function SksPanel({ navigate }) {
           api.get('/announcements'),
         ]);
       setStats(statsRes.data);
-      setPendingClubs(clubsRes.data.filter(c => c.status === 'pending'));
-      setActiveClubs(clubsRes.data.filter(c => c.status === 'active'));
+      const allClubs = clubsRes.data;
+      console.log('ALL CLUBS:', allClubs.map(c => ({name: c.name, status: c.status})));
+      setPendingClubs(allClubs.filter(c => c.status === 'pending'));
+      setActiveClubs(allClubs.filter(c => c.status === 'active'));
       setEvents(eventsRes.data);
       setStudents(studentsRes.data.filter(u => u.role === 'student'));
       setReservations(reservationsRes.data);
@@ -54,7 +56,7 @@ export default function SksPanel({ navigate }) {
 
   const handleApprove = async (clubId) => {
     try {
-      await api.post(`/clubs/${clubId}/approve`);
+      await api.put(`/clubs/${clubId}/approve`);
       setPendingClubs(prev => prev.filter(c => c.id !== clubId));
       Alert.alert('Başarılı', 'Kulüp onaylandı!');
       fetchData();
@@ -68,7 +70,7 @@ export default function SksPanel({ navigate }) {
       { text: 'İptal', style: 'cancel' },
       { text: 'Reddet', style: 'destructive', onPress: async () => {
         try {
-          await api.post(`/clubs/${clubId}/reject`);
+          await api.put(`/clubs/${clubId}/reject`);
           setPendingClubs(prev => prev.filter(c => c.id !== clubId));
           fetchData();
         } catch {
@@ -83,7 +85,7 @@ export default function SksPanel({ navigate }) {
       { text: 'İptal', style: 'cancel' },
       { text: 'Askıya Al', style: 'destructive', onPress: async () => {
         try {
-          await api.post(`/clubs/${clubId}/suspend`);
+          await api.put(`/clubs/${clubId}/suspend`);
           fetchData();
         } catch {
           Alert.alert('Hata', 'İşlem başarısız.');
@@ -170,6 +172,27 @@ export default function SksPanel({ navigate }) {
           <Text style={styles.statLabel}>Bekleyen</Text>
         </View>
       </View>
+
+      <View style={styles.infoCard}>
+        <Text style={styles.infoCardTitle}>📊 Sistem Durumu</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoRowLabel}>Platform</Text>
+          <Text style={styles.infoRowValue}>Campus Hub v1.0</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoRowLabel}>Üniversite</Text>
+          <Text style={styles.infoRowValue}>Fırat Üniversitesi</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoRowLabel}>Aktif Topluluk</Text>
+          <Text style={styles.infoRowValue}>{activeClubs.length}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoRowLabel}>Bekleyen Başvuru</Text>
+          <Text style={styles.infoRowValue}>{pendingClubs.length}</Text>
+        </View>
+      </View>
+
       <View style={{height: 100}} />
     </ScrollView>
   );
@@ -560,4 +583,15 @@ const styles = StyleSheet.create({
   tabIcon: { fontSize: 20 },
   tabLabel: { color: '#9ca3af', fontSize: 10, marginTop: 2 },
   tabLabelActive: { color: '#800000', fontWeight: '600' },
+  infoCard: { backgroundColor: '#fff', borderRadius: 16,
+    padding: 16, marginTop: 12,
+    shadowColor: '#000', shadowOffset: {width:0, height:2},
+    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
+  infoCardTitle: { color: '#1f2937', fontWeight: 'bold',
+    fontSize: 15, marginBottom: 12 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between',
+    paddingVertical: 8, borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6' },
+  infoRowLabel: { color: '#6b7280', fontSize: 13 },
+  infoRowValue: { color: '#1f2937', fontWeight: '600', fontSize: 13 },
 });
