@@ -37,7 +37,6 @@ export default function SksPanel({ navigate }) {
         ]);
       setStats(statsRes.data);
       const allClubs = clubsRes.data;
-      console.log('ALL CLUBS:', allClubs.map(c => ({name: c.name, status: c.status})));
       setPendingClubs(allClubs.filter(c => c.status === 'pending'));
       setActiveClubs(allClubs.filter(c => c.status === 'active'));
       setEvents(eventsRes.data);

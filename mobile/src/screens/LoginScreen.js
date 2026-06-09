@@ -200,7 +200,8 @@ export default function LoginScreen({ navigate }) {
   if (screen === 'landing') {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.splashInner}>
+        <View style={{ flex: 1, justifyContent: 'center', 
+          paddingHorizontal: 24 }}>
 
           <Text style={styles.logo}>Campus Hub</Text>
           <Text style={styles.subtitle}>Fırat Üniversitesi</Text>
@@ -269,7 +270,10 @@ export default function LoginScreen({ navigate }) {
           style={styles.splashInner}>
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1,
+              justifyContent: 'center', paddingHorizontal: 24,
+              paddingVertical: 20 }}>
 
             <TouchableOpacity
               onPress={() => setScreen('login')}
@@ -369,7 +373,7 @@ export default function LoginScreen({ navigate }) {
           <ScrollView
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ flexGrow: 1, 
+            contentContainerStyle={{ flexGrow: 1,
               justifyContent: 'center', paddingHorizontal: 24,
               paddingVertical: 20 }}>
 
@@ -531,13 +535,8 @@ export default function LoginScreen({ navigate }) {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}>
-        <View style={{ 
-          flex: 1, 
-          justifyContent: 'center', 
-          paddingHorizontal: 24,
-          paddingTop: 0,
-          marginTop: 0,
-        }}>
+        <View style={{ flex: 1, justifyContent: 'center',
+          paddingHorizontal: 24 }}>
 
           <TouchableOpacity
             onPress={() => setScreen('landing')}
@@ -547,7 +546,8 @@ export default function LoginScreen({ navigate }) {
 
           <ScrollView
             keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>
                 {role === 'student' ? '🎓 Öğrenci Girişi'
